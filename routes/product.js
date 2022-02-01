@@ -2,6 +2,7 @@ const multer = require("multer");
 const express = require("express");
 const slugify = require("slugify");
 const shortid = require("shortid");
+const path = require("path");
 
 const { requireSignin, readUserInfo, isAdmin } = require("../middlewares");
 const {
