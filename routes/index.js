@@ -5,7 +5,6 @@ const productRoutes = require("./product");
 const addressRoutes = require("./address");
 const categoryRoutes = require("./category");
 
-const pageRoutes = require("./admin/page");
 const adminRoutes = require("./admin/auth");
 const adminOrderRoutes = require("./admin/order");
 const initialDataRoutes = require("./admin/initialData");
@@ -18,7 +17,6 @@ module.exports = [
   productRoutes,
   addressRoutes,
   categoryRoutes,
-  pageRoutes,
   adminRoutes,
   adminOrderRoutes,
   initialDataRoutes,
