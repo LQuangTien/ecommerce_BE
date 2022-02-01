@@ -17,16 +17,16 @@ const {
 } = require("../controllers/product");
 
 const router = express.Router();
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, express.static(path.join(__dirname, "uploads")));
-  },
-  filename: function (req, file, cb) {
-    const { name } = req.body;
-    cb(null, slugify(name) + "-" + Date.now() + ".jpg");
-  },
-});
-const upload = multer({ storage });
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, express.static(path.join(__dirname, "uploads")));
+//   },
+//   filename: function (req, file, cb) {
+//     const { name } = req.body;
+//     cb(null, slugify(name) + "-" + Date.now() + ".jpg");
+//   },
+// });
+const upload = multer({ dest: "./public/uploads/" });
 
 router.post(
   "/product/create",

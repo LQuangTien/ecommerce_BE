@@ -24,7 +24,8 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use("/public", express.static(path.join(__dirname, "uploads")));
+// app.use("/public", express.static(path.join(__dirname, "uploads")));
+app.use(express.static("public"));
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
