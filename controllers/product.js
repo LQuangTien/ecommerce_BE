@@ -349,13 +349,25 @@ exports.getAll = async (req, res) => {
 
 function pagination(products, page = 1, perPage = 8) {
   const previousItem = (page - 1) * Number(perPage);
-
+  // Use for search page to multi query
+  const metadata = {
+    categories: [...new Set(products.map((p) => p.category))],
+    brands: [
+      ...new Set(
+        products.map(
+          (p) =>
+            p.categoryInfo.find((c) => c.name.toLowerCase() === "brand").value
+        )
+      ),
+    ],
+  };
   return {
     result: {
       products: products.slice(previousItem, previousItem + Number(perPage)),
       totalPage: Math.ceil(products.length / Number(perPage)),
       currentPage: page,
       totalProduct: products.length,
+      metadata,
     },
   };
 }
