@@ -131,7 +131,7 @@ async function sendEmail(userEmail, newPwd) {
     host: "smtp.gmail.com",
     auth: {
       user: "quangtienclone@gmail.com",
-      pass: "tien123!",
+      pass: "Tien123!",
     },
   });
 
@@ -144,3 +144,61 @@ async function sendEmail(userEmail, newPwd) {
     html: "<b>" + "This is your new Password: " + newPwd + "</b>", // html body
   });
 }
+
+exports.googleSignin = (req, res) => {
+  User.findOne({ email: req.body.email }).exec(async (error, user) => {
+    if (error) return ServerError(res, error);
+    if (user) {
+      if (user.accountType !== "google") {
+        return BadRequest(
+          res,
+          "Make sure you are logged in with your google account"
+        );
+      }
+      const token = jwt.sign(
+        {
+          _id: user._id,
+          role: user.role,
+          exp: Math.floor(Date.now()) + ONE_HOUR,
+        },
+        process.env.JWT_SECRET
+      );
+      const { firstName, lastName, email, fullName } = user;
+      return Response(res, {
+        token,
+        user: { firstName, lastName, email, fullName },
+      });
+    } else {
+      const { firstName, lastName, email } = req.body;
+      try {
+        const newUser = User({
+          firstName,
+          lastName,
+          email,
+          username: `${firstName} ${lastName}`,
+          accountType: "google",
+        });
+        newUser.save((error, user) => {
+          if (error) return ServerError(res, error.message);
+          if (user) {
+            const token = jwt.sign(
+              {
+                _id: user._id,
+                role: user.role,
+                exp: Math.floor(Date.now()) + ONE_HOUR,
+              },
+              process.env.JWT_SECRET
+            );
+            const { firstName, lastName, email, fullName } = user;
+            return Response(res, {
+              token,
+              user: { firstName, lastName, email, fullName },
+            });
+          }
+        });
+      } catch (error) {
+        return ServerError(res, error.message);
+      }
+    }
+  });
+};

@@ -29,7 +29,8 @@ const userSchema = new mongoose.Schema(
     },
     hash_password: {
       type: String,
-      required: true,
+      // bỏ required vì dùng oauth
+      // required: true,
     },
     role: {
       type: String,
@@ -38,6 +39,11 @@ const userSchema = new mongoose.Schema(
     },
     contactNumner: { type: String },
     profilePicture: { type: String },
+    accountType: {
+      type: String,
+      enum: ["google", "facebook", "email"],
+      default: "email",
+    },
   },
   { timestamps: true }
 );

@@ -12,11 +12,13 @@ const {
   signout,
   changePassword,
   forgetPassword,
+  googleSignin,
 } = require("../controllers/auth");
 
 const router = express.Router();
 
 router.post("/signin", validateSignin, isAuthValidated, signin);
+router.post("/signin", googleSignin);
 router.post("/signup", validateSignup, isAuthValidated, signup);
 router.post("/signout", requireSignin, signout);
 router.post("/forget-password", forgetPassword);
