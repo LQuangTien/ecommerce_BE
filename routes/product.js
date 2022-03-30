@@ -14,6 +14,7 @@ const {
   remove,
   getAll,
   enable,
+  comment,
 } = require("../controllers/product");
 
 const router = express.Router();
@@ -35,7 +36,7 @@ router.post(
   upload.array("productPictures"),
   create
 );
-
+router.post("/product/comment", comment);
 router.put(
   "/product/:id",
   requireSignin,
@@ -49,5 +50,6 @@ router.get("/product/:id", readUserInfo, getById);
 
 router.get("/products/search/:page/:perPage", readUserInfo, getByQuery);
 router.get("/products/", readUserInfo, getAll);
+
 
 module.exports = router;

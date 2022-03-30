@@ -6,7 +6,11 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const routes = require("./routes");
 const cloudinary = require("cloudinary").v2;
+<<<<<<< Updated upstream
 const socketio = require('socket.io');
+=======
+const io = require('socket.io');
+>>>>>>> Stashed changes
 
 const app = express();
 env.config();

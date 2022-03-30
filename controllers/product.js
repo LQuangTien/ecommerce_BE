@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const fs = require("fs/promises");
 const Product = require("../models/product");
 const Category = require("../models/category");
+const Comment = require("../models/comment");
 const shortid = require("shortid");
 const slugify = require("slugify");
 const cloudinary = require("cloudinary").v2;
@@ -347,8 +348,58 @@ exports.getAll = async (req, res) => {
   }
 };
 
+
+exports.comment = async (req, res) => {
+  try {
+
+    const newComment = new Comment({
+      productId: req.body.productid,
+      // userId: req.user._id,
+      userId: req.body.userid,
+      content: req.body.content,
+      rating: req.body.rating
+    });
+
+    const savedComment = await newComment.save();
+
+    return Create(res, {savedComment});
+  } catch (error) {
+    return ServerError(res, error.messages);
+  }
+};
+
+exports.getAllCommentFromProductId = async (req, res) => {
+  try {
+    const newComment = new Comment({
+      productId: req.body.productId,
+      userId: req.body.userId,
+      content: req.body.content,
+      rating: req.body.rating
+    });
+
+    const savedComment = await newComment.save();
+
+    return Get(res, { result: { savedComment } });
+  } catch (error) {
+    return ServerError(res, error.messages);
+  }
+};
+
 function pagination(products, page = 1, perPage = 8) {
   const previousItem = (page - 1) * Number(perPage);
+  
+  return {
+    result: {
+      products: products.slice(previousItem, previousItem + Number(perPage)),
+      totalPage: Math.ceil(products.length / Number(perPage)),
+      currentPage: page,
+      totalProduct: products.length,
+      metadata,
+    },
+  };
+}
+
+function addMetaDataFor(products){
   // Use for search page to multi query
   const metadata = {
     categories: [...new Set(products.map((p) => p.category))],
@@ -361,15 +412,24 @@ function pagination(products, page = 1, perPage = 8) {
       ),
     ],
   };
-  return {
-    result: {
-      products: products.slice(previousItem, previousItem + Number(perPage)),
-      totalPage: Math.ceil(products.length / Number(perPage)),
-      currentPage: page,
-      totalProduct: products.length,
-      metadata,
-    },
+}
+
+//prevent active html code on client(XSS)
+// function escape(s) {
+//   return s.replace(
+//       /[^0-9A-Za-z ]/g,
+//       c => "&#" + c.charCodeAt(0) + ";"
+//   );
+// }
+function escape(s) {
+  let lookup = {
+      '&': "&amp;",
+      '"': "&quot;",
+      '\'': "&apos;",
+      '<': "&lt;",
+      '>': "&gt;"
   };
+  return s.replace( /[&"'<>]/g, c => lookup[c] );
 }
 
 async function getProductHasCategoryAvailable(products) {

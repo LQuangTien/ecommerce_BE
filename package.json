@@ -14,7 +14,7 @@
   "dependencies": {
     "axios": "^0.24.0",
     "bcrypt": "^5.0.1",
-    "cloudinary": "^1.28.1",
+    "cloudinary": "^1.29.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
     "deep-object-diff": "^1.1.0",
