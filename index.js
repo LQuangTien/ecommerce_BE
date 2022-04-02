@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const routes = require("./routes");
 const cloudinary = require("cloudinary").v2;
-const socketio = require('socket.io');
+const socketio = require("socket.io");
 
 const app = express();
 env.config();
@@ -43,18 +43,20 @@ const server = app.listen(process.env.PORT, () => {
 
 const io = socketio(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://ecommerce-client-teal.vercel.app"],
-  }
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      process.env.CLIENT_APP_DOMAIN,
+      process.env.ADMIN_APP_DOMAIN,
+    ],
+  },
 });
 
-io.on('connection', (socket) => {
-  app.set('socket', socket);
-  console.log('aaaa')
+io.on("connection", (socket) => {
+  app.set("socket", socket);
+  console.log("aaaa");
 
-  socket.on('my message', (msg) => {
-    console.log('message: ' + msg);
-  });
-
+  require("./chat.js")(socket, io);
 });
 
-app.set('io', io);
+app.set("io", io);
