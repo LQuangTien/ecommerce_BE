@@ -15,7 +15,7 @@ const {
   getAll,
   enable,
   getAllNotify,
-  getAllComment,
+  getAllCommentProduct,
 } = require("../controllers/product");
 
 const router = express.Router();
@@ -49,10 +49,9 @@ router.put("/product/enable/:id", requireSignin, isAdmin, enable);
 router.delete("/product/:id", requireSignin, isAdmin, remove);
 router.get("/product/:id", readUserInfo, getById);
 
-router.get("/product/comment/:page/:perPage", getAllComment);
+router.get("/product/comment/:productId/:page/:perPage", getAllCommentProduct);
 
 router.get("/products/search/:page/:perPage", readUserInfo, getByQuery);
 router.get("/products/", readUserInfo, getAll);
-
 
 module.exports = router;

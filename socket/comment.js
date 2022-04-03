@@ -1,17 +1,17 @@
-const User = require('../models/user.js');
-const Comment = require('../models/comment.js');
-const Notify = require('../models/notify.js');
+const User = require("../models/user.js");
+const Comment = require("../models/comment.js");
+const Notify = require("../models/notify.js");
 
 module.exports = function (socket, io) {
   socket.on("submit", async (commentContent) => {
     try {
-      const user = await User.findOne({_id:socket.user._id});
+      const user = await User.findOne({ _id: socket.user._id });
 
       const comment = {
         userId: user._id,
         userName: user.username,
-        content:commentContent.comment,
-        rating:commentContent.rating,
+        content: commentContent.comment,
+        rating: commentContent.rating,
       };
       const newComment = await new Comment({
         productId: commentContent.productId,
@@ -21,7 +21,7 @@ module.exports = function (socket, io) {
 
       const savedComment = await newComment.save();
 
-      socket.emit('submit', savedComment);
+      socket.emit("submit", savedComment);
 
       const newNotify = new Notify({
         productId: commentContent.productId,
@@ -34,11 +34,10 @@ module.exports = function (socket, io) {
       const savedNotify = await newNotify.save();
 
       //Notify to all online admin is connecting to /admin domain
-      io.of('/admin').emit('notify admin', savedNotify);
-
+      io.of("/admin").emit("notify admin", savedNotify);
     } catch (error) {
-      socket.emit('error', error)
-      console.log(error)
+      socket.emit("error", error);
+      console.log(error);
     }
   });
 };

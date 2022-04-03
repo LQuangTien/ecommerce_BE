@@ -162,7 +162,7 @@ exports.getById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
-    console.log(req.params.id)
+    console.log(req.params.id);
     const categoryOfProduct = await Category.findOne({
       name: product.category,
     });
@@ -353,12 +353,15 @@ exports.getAll = async (req, res) => {
   }
 };
 
-exports.getAllComment = async (req, res) => {
+exports.getAllCommentProduct = async (req, res) => {
   try {
-    const comments = await Comment.find({});
+    const comments = await Comment.find({
+      productId: req.params.productId,
+    }).sort({ createdAt: -1 });
 
-    return Get(res, { result: pagination(comments, req.params.page, req.params.perPage) });
-
+    return Get(res, {
+      result: pagination(comments, req.params.page, req.params.perPage),
+    });
   } catch (error) {
     return ServerError(res, error.messages);
   }
@@ -369,8 +372,7 @@ exports.getAllNotify = async (req, res) => {
     const notifies = await Notify.find({});
 
     notifies.total = notifies.length;
-    return Get(res, { result: {notifies,total:notifies.length} });
-
+    return Get(res, { result: { notifies, total: notifies.length } });
   } catch (error) {
     return ServerError(res, error.message);
   }
@@ -395,11 +397,14 @@ exports.changeCommentStatusToOld = async (req, res) => {
 exports.findPositionOfCommentBeChose = async (req, res) => {
   try {
     //Count amount of comment before it to know index
-    const commentIndex = await Comment.find({ _id: { "lte": commentId } }).count();
+    const commentIndex = await Comment.find({
+      _id: { lte: commentId },
+    }).count();
 
-    const pageNumberOfComment = commentIndex % commentPerPage === 0
-      ? Math.floor(commentIndex / commentPerPage)
-      : Math.floor(commentIndex / commentPerPage) + 1;
+    const pageNumberOfComment =
+      commentIndex % commentPerPage === 0
+        ? Math.floor(commentIndex / commentPerPage)
+        : Math.floor(commentIndex / commentPerPage) + 1;
 
     return Get(res, { position: { pageNumberOfComment } });
   } catch (error) {
@@ -443,13 +448,13 @@ function addMetaDataForSearchInCategory(products) {
 // }
 function escape(s) {
   let lookup = {
-    '&': "&amp;",
+    "&": "&amp;",
     '"': "&quot;",
-    '\'': "&apos;",
-    '<': "&lt;",
-    '>': "&gt;"
+    "'": "&apos;",
+    "<": "&lt;",
+    ">": "&gt;",
   };
-  return s.replace(/[&"'<>]/g, c => lookup[c]);
+  return s.replace(/[&"'<>]/g, (c) => lookup[c]);
 }
 
 async function getProductHasCategoryAvailable(products) {
