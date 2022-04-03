@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const commentSchema = mongoose.Schema(
+const notifySchema = mongoose.Schema(
     {
         productId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -13,42 +13,31 @@ const commentSchema = mongoose.Schema(
             required: true,
             trim: true,
         },
-        productId: {
+        userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
+            ref: "User",
             required: true,
             trim: true,
         },
-        productName: {
+        userName: {
             type: String,
             required: true,
             trim: true,
         },
-        content: {
+        commentId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Comment",
+            required: true,
+            trim: true,
+        },
+        status: {
             type: String,
+            enum: ["new", "old"],
             required: true,
+            default: "new",
         },
-        rating: {
-            type: Number,
-            required: true,
-        },
-        subComment: [
-            {
-                userId: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "User",
-                    required: true,
-                    trim: true,
-                },
-                content: {
-                    type: String,
-                    required: true,
-                }
-            }
-        ]
     },
     { timestamps: true }
 );
 
-
-module.exports = mongoose.model("Comment", commentSchema);
+module.exports = mongoose.model("Notify", notifySchema);

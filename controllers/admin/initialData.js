@@ -55,6 +55,7 @@ exports.initialData = async (req, res) => {
       return acc;
     }, 0);
 
+    // return res.sendFile(__dirname + '/admin.html');
     return Get(res, {
       result: {
         categories,

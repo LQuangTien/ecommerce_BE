@@ -8,21 +8,11 @@ const commentSchema = mongoose.Schema(
             required: true,
             trim: true,
         },
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-            trim: true,
-        },
-        content: {
+        productName: {
             type: String,
             required: true,
         },
-        rating: {
-            type: Number,
-            required: true,
-        },
-        subComment: [
+        comment: [
             {
                 userId: {
                     type: mongoose.Schema.Types.ObjectId,
@@ -30,12 +20,38 @@ const commentSchema = mongoose.Schema(
                     required: true,
                     trim: true,
                 },
+                userName: {
+                    type: String,
+                    required: true,
+                },
                 content: {
                     type: String,
                     required: true,
-                }
+                },
+                rating: {
+                    type: Number,
+                    required: true,
+                },
+                subComment: [
+                    {
+                        userId: {
+                            type: mongoose.Schema.Types.ObjectId,
+                            ref: "User",
+                            required: true,
+                            trim: true,
+                        },
+                        userName: {
+                            type: String,
+                            required: true,
+                        },
+                        content: {
+                            type: String,
+                            required: true,
+                        }
+                    }
+                ]
             }
-        ]
+        ],
     },
     { timestamps: true }
 );
