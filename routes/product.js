@@ -14,6 +14,8 @@ const {
   remove,
   getAll,
   enable,
+  getAllNotify,
+  getAllComment,
 } = require("../controllers/product");
 
 const router = express.Router();
@@ -35,7 +37,7 @@ router.post(
   upload.array("productPictures"),
   create
 );
-
+router.get("/product/notify", getAllNotify);
 router.put(
   "/product/:id",
   requireSignin,
@@ -47,7 +49,10 @@ router.put("/product/enable/:id", requireSignin, isAdmin, enable);
 router.delete("/product/:id", requireSignin, isAdmin, remove);
 router.get("/product/:id", readUserInfo, getById);
 
+router.get("/product/comment/:page/:perPage", getAllComment);
+
 router.get("/products/search/:page/:perPage", readUserInfo, getByQuery);
 router.get("/products/", readUserInfo, getAll);
+
 
 module.exports = router;

@@ -7,8 +7,8 @@ const {
 } = require("../../controllers/admin/initialData");
 
 const router = express.Router();
-//requireSignin, isAdmin,
 router.get("/admin/initialdata", requireSignin, isAdmin, initialData);
+// router.get("/admin/initialdata" , initialData); 
 router.get(
   "/admin/totalOrderPricePerMonthByYear",
   requireSignin,

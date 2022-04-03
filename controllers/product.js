@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const fs = require("fs/promises");
 const Product = require("../models/product");
 const Category = require("../models/category");
+const Comment = require("../models/comment");
+const Notify = require("../models/notify");
 const shortid = require("shortid");
 const slugify = require("slugify");
 const cloudinary = require("cloudinary").v2;
@@ -160,6 +162,7 @@ exports.getById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
+    console.log(req.params.id)
     const categoryOfProduct = await Category.findOne({
       name: product.category,
     });
@@ -171,6 +174,8 @@ exports.getById = async (req, res) => {
       req.user.role !== "staff"
     )
       return NotFound(res, "Product");
+
+    // return res.sendFile(__dirname + '/index.html');
     return Get(res, { product });
   } catch (error) {
     return ServerError(res, error.message);
@@ -324,6 +329,7 @@ exports.getByQuery = async (req, res) => {
     if (filterAvailableProduct) {
       const { page, perPage } = req.params;
       const result = pagination(filterAvailableProduct, page, perPage);
+      result.metadata = addMetaDataForSearchInCategory(filterAvailableProduct);
       return Get(res, result);
     }
 
@@ -347,10 +353,75 @@ exports.getAll = async (req, res) => {
   }
 };
 
-function pagination(products, page = 1, perPage = 8) {
+exports.getAllComment = async (req, res) => {
+  try {
+    const comments = await Comment.find({});
+
+    return Get(res, { result: pagination(comments, req.params.page, req.params.perPage) });
+
+  } catch (error) {
+    return ServerError(res, error.messages);
+  }
+};
+
+exports.getAllNotify = async (req, res) => {
+  try {
+    const notifies = await Notify.find({});
+
+    notifies.total = notifies.length;
+    return Get(res, { result: {notifies,total:notifies.length} });
+
+  } catch (error) {
+    return ServerError(res, error.message);
+  }
+};
+
+exports.changeCommentStatusToOld = async (req, res) => {
+  try {
+    const updatedComment = await Comment.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: { status: "old" },
+      },
+      { new: true, useFindAndModify: false }
+    ).exec();
+    if (updatedComment) return Update(res, { updatedComment });
+    return NotFound(res, "Product");
+  } catch (error) {
+    return ServerError(res, error.message);
+  }
+};
+
+exports.findPositionOfCommentBeChose = async (req, res) => {
+  try {
+    //Count amount of comment before it to know index
+    const commentIndex = await Comment.find({ _id: { "lte": commentId } }).count();
+
+    const pageNumberOfComment = commentIndex % commentPerPage === 0
+      ? Math.floor(commentIndex / commentPerPage)
+      : Math.floor(commentIndex / commentPerPage) + 1;
+
+    return Get(res, { position: { pageNumberOfComment } });
+  } catch (error) {
+    return ServerError(res, error.messages);
+  }
+};
+
+function pagination(items, page = 1, perPage = 8) {
   const previousItem = (page - 1) * Number(perPage);
+  return {
+    result: {
+      products: items.slice(previousItem, previousItem + Number(perPage)),
+      totalPage: Math.ceil(items.length / Number(perPage)),
+      currentPage: page,
+      totalProduct: items.length,
+    },
+  };
+}
+
+function addMetaDataForSearchInCategory(products) {
   // Use for search page to multi query
-  const metadata = {
+  return {
     categories: [...new Set(products.map((p) => p.category))],
     brands: [
       ...new Set(
@@ -361,15 +432,24 @@ function pagination(products, page = 1, perPage = 8) {
       ),
     ],
   };
-  return {
-    result: {
-      products: products.slice(previousItem, previousItem + Number(perPage)),
-      totalPage: Math.ceil(products.length / Number(perPage)),
-      currentPage: page,
-      totalProduct: products.length,
-      metadata,
-    },
+}
+
+//prevent active html code on client(XSS)
+// function escape(s) {
+//   return s.replace(
+//       /[^0-9A-Za-z ]/g,
+//       c => "&#" + c.charCodeAt(0) + ";"
+//   );
+// }
+function escape(s) {
+  let lookup = {
+    '&': "&amp;",
+    '"': "&quot;",
+    '\'': "&apos;",
+    '<': "&lt;",
+    '>': "&gt;"
   };
+  return s.replace(/[&"'<>]/g, c => lookup[c]);
 }
 
 async function getProductHasCategoryAvailable(products) {
