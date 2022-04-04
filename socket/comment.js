@@ -19,7 +19,7 @@ module.exports = function (socket, io) {
       //   comment,
       // });
 
-      Comment.findOneAndUpdate(
+      const updatedComment = Comment.findOneAndUpdate(
         { _id: commentContent.productId },
         {
           $push: {
@@ -31,14 +31,14 @@ module.exports = function (socket, io) {
 
       // const savedComment = await newComment.save();
 
-      socket.emit("submit", savedComment);
+      socket.emit("submit", updatedComment);
 
       const newNotify = new Notify({
         productId: commentContent.productId,
         productName: commentContent.productName,
         userId: user._id,
         userName: user.username,
-        commentId: savedComment._id,
+        commentId: updatedComment._id,
       });
 
       const savedNotify = await newNotify.save();
