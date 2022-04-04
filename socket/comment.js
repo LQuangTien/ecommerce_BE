@@ -20,14 +20,14 @@ module.exports = function (socket, io) {
       // });
 
       const updatedComment = Comment.findOneAndUpdate(
-        { _id: commentContent.productId },
+        { productId: commentContent.productId },
         {
-          $push: {
-            comment
-          },
+            $push: {
+              comment
+            }       
         },
         { new: true, upsert: true }
-      ).exec(async(err, data) => {
+      ).exec(async (err, data) => {
         socket.emit("submit", updatedComment);
 
         const newNotify = new Notify({
@@ -40,8 +40,9 @@ module.exports = function (socket, io) {
 
         const savedNotify = await newNotify.save();
 
-        // console.log("comment", data);
-        // console.log("notify", savedNotify);
+        console.log("id", commentContent.productId)
+        console.log("comment", data);
+        console.log("notify", savedNotify);
 
         //Notify to all online admin is connecting to /admin domain
         io.of("/admin").emit("notify admin", savedNotify);

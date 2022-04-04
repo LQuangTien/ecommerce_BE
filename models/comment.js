@@ -32,6 +32,11 @@ const commentSchema = mongoose.Schema(
           type: Number,
           required: true,
         },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+          required: true,
+        },
         subComment: [
           {
             userId: {
