@@ -35,7 +35,7 @@ cloudinary.config({
 });
 
 routes.forEach((route) => {
-  app.use("/api", route);
+  app.use("/", route);
 });
 
 const server = app.listen(process.env.PORT, () => {
