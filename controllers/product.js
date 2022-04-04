@@ -7,6 +7,7 @@ const Notify = require("../models/notify");
 const shortid = require("shortid");
 const slugify = require("slugify");
 const cloudinary = require("cloudinary").v2;
+
 const {
   ServerError,
   Create,
@@ -45,14 +46,23 @@ exports.create = async (req, res) => {
     const pictures = await Promise.all(imagePromies);
     const hasColor = parseCate.find((x) => x.name === "color");
 
-    // const newProduct = new Product({
-    //   name: hasColor ? name + " " + hasColor.value : name,
-    //   categoryInfo: parseCate,
-    //   productPictures: pictures,
-    //   ...other,
-    // });
+    const newProduct = new Product({
+      name: hasColor ? name + " " + hasColor.value : name,
+      categoryInfo: parseCate,
+      productPictures: pictures,
+      ...other,
+    });
 
-    // const savedProduct = await newProduct.save();
+    const savedProduct = await newProduct.save();
+
+    const productComment = new Comment({
+      productId: savedProduct._id,
+      productName: savedProduct.name,
+      comment: []
+    });
+
+    await productComment.save();
+
     return Get(res, "avc");
   } catch (error) {
     return ServerError(res, error.message);
@@ -397,11 +407,15 @@ exports.changeCommentStatusToOld = async (req, res) => {
 exports.findPositionOfCommentBeChose = async (req, res) => {
   try {
     //Count amount of comment before it to know index
-    const commentIndex = await Comment.find({
-      _id: { $lt: req.params.commentId },
-    }).count();
 
-    console.log({ commentIndex });
+    const commentBeChose = await Comment.findById(req.params.commentId).exec();
+
+    console.log("id", req.params.commentId);
+    console.log("comment be chose", commentBeChose);
+    const commentIndex = await Comment.find({ createdAt: { $lt: commentBeChose.createdAt } }).count();
+
+
+    console.log("comment Index", commentIndex);
 
     const pageNumberOfComment =
       commentIndex % req.params.commentPerPage === 0
@@ -410,7 +424,9 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
 
     return Get(res, { position: { pageNumberOfComment } });
   } catch (error) {
+    console.log(error)
     return ServerError(res, error.messages);
+
   }
 };
 
@@ -418,7 +434,7 @@ function pagination(items, page = 1, perPage = 8) {
   const previousItem = (page - 1) * Number(perPage);
   return {
     result: {
-      products: items.slice(previousItem, previousItem + Number(perPage)),
+      items: items.slice(previousItem, previousItem + Number(perPage)),
       totalPage: Math.ceil(items.length / Number(perPage)),
       currentPage: page,
       totalProduct: items.length,
