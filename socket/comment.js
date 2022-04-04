@@ -27,24 +27,28 @@ module.exports = function (socket, io) {
           },
         },
         { new: true, upsert: true }
-      ).exec();
+      ).exec(async(err, data) => {
+        socket.emit("submit", updatedComment);
+
+        const newNotify = new Notify({
+          productId: commentContent.productId,
+          productName: commentContent.productName,
+          userId: user._id,
+          userName: user.username,
+          commentId: data._id,
+        });
+
+        const savedNotify = await newNotify.save();
+
+        // console.log("comment", data);
+        // console.log("notify", savedNotify);
+
+        //Notify to all online admin is connecting to /admin domain
+        io.of("/admin").emit("notify admin", savedNotify);
+      });
 
       // const savedComment = await newComment.save();
 
-      socket.emit("submit", updatedComment);
-
-      const newNotify = new Notify({
-        productId: commentContent.productId,
-        productName: commentContent.productName,
-        userId: user._id,
-        userName: user.username,
-        commentId: updatedComment._id,
-      });
-
-      const savedNotify = await newNotify.save();
-
-      //Notify to all online admin is connecting to /admin domain
-      io.of("/admin").emit("notify admin", savedNotify);
     } catch (error) {
       socket.emit("error", error);
       console.log(error);
