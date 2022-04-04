@@ -38,7 +38,7 @@ router.post(
   upload.array("productPictures"),
   create
 );
-router.get("/product/notify", getAllNotify);
+router.get("/product/notify", requireSignin, isAdmin, getAllNotify);
 router.put(
   "/product/:id",
   requireSignin,

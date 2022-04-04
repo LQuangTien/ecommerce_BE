@@ -13,13 +13,23 @@ module.exports = function (socket, io) {
         content: commentContent.comment,
         rating: commentContent.rating,
       };
-      const newComment = await new Comment({
-        productId: commentContent.productId,
-        productName: commentContent.productName,
-        comment,
-      });
+      // const newComment = await new Comment({
+      //   productId: commentContent.productId,
+      //   productName: commentContent.productName,
+      //   comment,
+      // });
 
-      const savedComment = await newComment.save();
+      Comment.findOneAndUpdate(
+        { _id: commentContent.productId },
+        {
+          $push: {
+            comment
+          },
+        },
+        { new: true, upsert: true }
+      ).exec();
+
+      // const savedComment = await newComment.save();
 
       socket.emit("submit", savedComment);
 
