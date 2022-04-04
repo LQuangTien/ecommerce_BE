@@ -6,8 +6,8 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const routes = require("./routes");
 const cloudinary = require("cloudinary").v2;
-const socketio = require('socket.io');
-const jwt = require('jsonwebtoken');
+const socketio = require("socket.io");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 env.config();
@@ -45,34 +45,34 @@ const server = app.listen(process.env.PORT, () => {
 const io = socketio(server, {
   cors: {
     //"http://localhost:8000/api/product/"
-    origin: ["http://localhost:3000","http://localhost:3001", "https://ecommerce-client-teal.vercel.app"],
-  }
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://ecommerce-client-teal.vercel.app",
+    ],
+  },
 });
 
-io.on('connection', (socket) => {
-  app.set('socket', socket);
+io.on("connection", (socket) => {
+  app.set("socket", socket);
 
-  socket.on('onUserLoggedIn',(token)=>{
-    const user = jwt.verify(token,process.env.JWT_SECRET);
+  socket.on("onUserLoggedIn", (token) => {
+    const user = jwt.verify(token, process.env.JWT_SECRET);
 
-    if(user.exp<Math.floor(Date.now())){
+    if (user.exp < Math.floor(Date.now())) {
       socket.user = null;
-    }
-    else {
+    } else {
       socket.user = user;
     }
   });
 
-
-
-  console.log(socket.id+' is connecting')
+  console.log(socket.id + " is connecting");
 
   // socket.on('submit', (msg) => {
   //   console.log(msg);
   // });
 
-  require('./socket/comment')(socket,io);
-
+  require("./socket/comment")(socket, io);
 });
 
 // io.of('/admin').on('connection',(socket)=>{
@@ -82,9 +82,7 @@ io.on('connection', (socket) => {
 //   })
 // })
 
-app.set('io', io);
-
-
+app.set("io", io);
 
 // module.exports = function handleSocket(io) {
 //   function chat(){}

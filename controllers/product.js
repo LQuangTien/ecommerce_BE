@@ -398,13 +398,15 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
   try {
     //Count amount of comment before it to know index
     const commentIndex = await Comment.find({
-      _id: { lte: commentId },
+      _id: { $lt: req.params.commentId },
     }).count();
 
+    console.log({ commentIndex });
+
     const pageNumberOfComment =
-      commentIndex % commentPerPage === 0
-        ? Math.floor(commentIndex / commentPerPage)
-        : Math.floor(commentIndex / commentPerPage) + 1;
+      commentIndex % req.params.commentPerPage === 0
+        ? Math.floor(commentIndex / req.params.commentPerPage)
+        : Math.floor(commentIndex / req.params.commentPerPage) + 1;
 
     return Get(res, { position: { pageNumberOfComment } });
   } catch (error) {

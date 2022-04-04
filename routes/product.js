@@ -16,6 +16,7 @@ const {
   enable,
   getAllNotify,
   getAllCommentProduct,
+  findPositionOfCommentBeChose,
 } = require("../controllers/product");
 
 const router = express.Router();
@@ -53,5 +54,9 @@ router.get("/product/comment/:productId/:page/:perPage", getAllCommentProduct);
 
 router.get("/products/search/:page/:perPage", readUserInfo, getByQuery);
 router.get("/products/", readUserInfo, getAll);
+router.get(
+  "/products/getCommentPosition/:commentPerPage/:commentId",
+  findPositionOfCommentBeChose
+);
 
 module.exports = router;
