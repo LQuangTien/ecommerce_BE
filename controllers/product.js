@@ -466,7 +466,9 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
       commentIndex[0].count + 1
       : 1;
 
-    const page = Math.floor(position / req.params.commentPerPage)+1; 
+    const page = position % req.params.commentPerPage ?
+    Math.floor(position / req.params.commentPerPage)
+    :Math.floor(position / req.params.commentPerPage)+1; 
     
     return Get(res, { result: { position,page } });
   } catch (error) {
