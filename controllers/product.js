@@ -397,7 +397,7 @@ exports.getAllCommentProduct = async (req, res) => {
 
 exports.getAllNotify = async (req, res) => {
   try {
-    const notifies = await Notify.find({});
+    const notifies = await Notify.find({}).sort({createdAt:-1});
 
     notifies.total = notifies.length;
     return Get(res, { result: { notifies, total: notifies.length } });
