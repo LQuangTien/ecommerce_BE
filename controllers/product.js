@@ -471,14 +471,15 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
       }
     ]);
 
-    console.log(commentIndex)
 
     //If commentIndex is empty array so this comment index is 0 so position is 1
     const position = commentIndex && commentIndex.length > 0 ?
       commentIndex[0].count + 1
       : 1;
 
-    return Get(res, { result: { position } });
+    const page = position / req.params.perPage; 
+    
+    return Get(res, { result: { position,page } });
   } catch (error) {
     console.log(error)
     return ServerError(res, error.messages);
