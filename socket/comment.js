@@ -2,10 +2,27 @@ const User = require("../models/user.js");
 const Comment = require("../models/comment.js");
 const Notify = require("../models/notify.js");
 
+function toISOLocal(d) {
+  var z  = n =>  ('0' + n).slice(-2);
+  var zz = n => ('00' + n).slice(-3);
+  var off = d.getTimezoneOffset();
+  var sign = off > 0? '-' : '+';
+  off = Math.abs(off);
+
+  return d.getFullYear() + '-'
+         + z(d.getMonth()+1) + '-' +
+         z(d.getDate()) + 'T' +
+         z(d.getHours()) + ':'  + 
+         z(d.getMinutes()) + ':' +
+         z(d.getSeconds()) + '.' +
+         zz(d.getMilliseconds()) +
+         sign + z(off/60|0) + ':' + z(off%60); 
+}
+
 module.exports = function (socket, io) {
   socket.on("submit", async (commentContent) => {
     try {
-      const commentCreatedAt = new Date().toISOString();
+      const commentCreatedAt = toISOLocal(new Date());//.toISOString();
 
       const user = await User.findOne({ _id: socket.user._id });
 
