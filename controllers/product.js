@@ -424,19 +424,6 @@ exports.changeCommentStatusToOld = async (req, res) => {
 
 exports.findPositionOfCommentBeChose = async (req, res) => {
   try {
-    //Count amount of comment before it to know index
-    // const commentNeedToFindPosition = await Comment.aggregate([
-    //   {
-    //     $match:
-    //       { productId: mongoose.Types.ObjectId(req.params.productId) }
-    //   },
-    //   {
-    //     $unwind: "$comment"
-    //   },
-    //   {
-
-    //   }
-    // ])
     const allProductComments = await Comment.findOne({ productId: req.params.productId });
 
     const commentNeedToFindPosition = allProductComments.comment.find((comment) => comment._id.toString() === req.params.commentId);
@@ -454,13 +441,13 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
       {
         $unwind: "$comment"
       },
-      {
-        $sort:
-          { "comment.createdAt": -1 }
-      },
+      // {
+      //   $sort:
+      //     { "comment.createdAt": -1 }
+      // },
       {
         $match:
-          { "comment.createdAt": { $lt: commentNeedToFindPosition.createdAt } }
+          { "comment.createdAt": { $gt: commentNeedToFindPosition.createdAt } }
       },
       {
         $group:
@@ -470,6 +457,8 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
         }
       }
     ]);
+    
+    console.log(commentIndex)
 
 
     //If commentIndex is empty array so this comment index is 0 so position is 1
@@ -477,7 +466,7 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
       commentIndex[0].count + 1
       : 1;
 
-    const page = position / req.params.perPage; 
+    const page = Math.floor(position / req.params.commentPerPage)+1; 
     
     return Get(res, { result: { position,page } });
   } catch (error) {
