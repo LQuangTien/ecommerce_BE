@@ -5,8 +5,10 @@ const Notify = require("../models/notify.js");
 module.exports = function (socket, io) {
   socket.on("submit", async (commentContent) => {
     try {
-      const now = new Date(); 
-      const commentCreatedAt = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
+      // const now = new Date(); 
+      // const commentCreatedAt = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
+      
+      const commentCreatedAt = new Date().toISOString();
       
       const user = await User.findOne({ _id: socket.user._id });
 
