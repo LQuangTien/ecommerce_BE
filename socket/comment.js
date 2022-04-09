@@ -5,6 +5,8 @@ const Notify = require("../models/notify.js");
 module.exports = function (socket, io) {
   socket.on("submit", async (commentContent) => {
     try {
+      const commentCreatedAt = new Date().toISOString();
+
       const user = await User.findOne({ _id: socket.user._id });
 
       const comment = {
@@ -12,12 +14,9 @@ module.exports = function (socket, io) {
         userName: user.username,
         content: commentContent.comment,
         rating: commentContent.rating,
+        createdAt:commentCreatedAt
       };
-      // const newComment = await new Comment({
-      //   productId: commentContent.productId,
-      //   productName: commentContent.productName,
-      //   comment,
-      // });
+      
 
       const updatedComment = Comment.findOneAndUpdate(
         { productId: commentContent.productId },
@@ -28,14 +27,17 @@ module.exports = function (socket, io) {
         },
         { new: true, upsert: true }
       ).exec(async (err, data) => {
-        socket.emit("submit", updatedComment);
+        
+        const newCommentBeAdded = data.comment.find((doc)=> doc.createdAt.toISOString()===commentCreatedAt);
+        
+        socket.emit("submit", newCommentBeAdded);
 
         const newNotify = new Notify({
           productId: commentContent.productId,
           productName: commentContent.productName,
           userId: user._id,
           userName: user.username,
-          commentId: data._id,
+          commentId: newCommentBeAdded._id,
         });
 
         const savedNotify = await newNotify.save();

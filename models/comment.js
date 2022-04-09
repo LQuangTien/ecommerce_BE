@@ -34,7 +34,6 @@ const commentSchema = mongoose.Schema(
         },
         createdAt: {
           type: Date,
-          default: Date.now,
           required: true,
         },
         subComment: [
@@ -51,6 +50,10 @@ const commentSchema = mongoose.Schema(
             },
             content: {
               type: String,
+              required: true,
+            },
+            createdAt: {
+              type: Date,
               required: true,
             },
           },
