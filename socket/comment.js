@@ -2,28 +2,12 @@ const User = require("../models/user.js");
 const Comment = require("../models/comment.js");
 const Notify = require("../models/notify.js");
 
-function toISOLocal(d) {
-  var z  = n =>  ('0' + n).slice(-2);
-  var zz = n => ('00' + n).slice(-3);
-  var off = d.getTimezoneOffset();
-  var sign = off > 0? '-' : '+';
-  off = Math.abs(off);
-
-  return d.getFullYear() + '-'
-         + z(d.getMonth()+1) + '-' +
-         z(d.getDate()) + 'T' +
-         z(d.getHours()) + ':'  + 
-         z(d.getMinutes()) + ':' +
-         z(d.getSeconds()) + '.' +
-         zz(d.getMilliseconds()) +
-         sign + z(off/60|0) + ':' + z(off%60); 
-}
-
 module.exports = function (socket, io) {
   socket.on("submit", async (commentContent) => {
     try {
-      const commentCreatedAt = toISOLocal(new Date());//.toISOString();
-
+      const now = new Date(); 
+      const commentCreatedAt = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
+      
       const user = await User.findOne({ _id: socket.user._id });
 
       const comment = {
@@ -33,7 +17,7 @@ module.exports = function (socket, io) {
         rating: commentContent.rating,
         createdAt:commentCreatedAt
       };
-      
+
 
       const updatedComment = Comment.findOneAndUpdate(
         { productId: commentContent.productId },
@@ -44,9 +28,9 @@ module.exports = function (socket, io) {
         },
         { new: true, upsert: true }
       ).exec(async (err, data) => {
-        
+
         const newCommentBeAdded = data.comment.find((doc)=> doc.createdAt.toISOString()===commentCreatedAt);
-        
+
         socket.emit("submit", newCommentBeAdded);
 
         const newNotify = new Notify({
@@ -59,8 +43,8 @@ module.exports = function (socket, io) {
 
         const savedNotify = await newNotify.save();
 
-        console.log("id", commentContent.productId)
-        console.log("comment", data);
+        // console.log("id", commentContent.productId)
+        console.log("comment", newCommentBeAdded);
         console.log("notify", savedNotify);
 
         //Notify to all online admin is connecting to /admin domain
@@ -75,3 +59,4 @@ module.exports = function (socket, io) {
     }
   });
 };
+
