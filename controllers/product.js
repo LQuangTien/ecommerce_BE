@@ -365,13 +365,30 @@ exports.getAll = async (req, res) => {
 
 exports.getAllCommentProduct = async (req, res) => {
   try {
-    
-    const comments = await Comment.find({
-      productId: req.params.productId,
-    }).sort({ createdAt: -1 });
+
+    // const comments = await Comment.find({
+    //   productId: req.params.productId,
+    // }).sort({ createdAt: -1 });
+    const comments = await Comment.aggregate([
+      {
+        $match:
+          { productId: mongoose.Types.ObjectId(req.params.productId) }
+      },
+      {
+        $project:
+          { comment: 1 }
+      },
+      {
+        $unwind: "$comment"
+      },
+      {
+        $sort:
+          { "comment.createdAt": -1 }
+      }
+    ]);
 
     return Get(res, {
-      result: pagination(comments[0].comment,req.params.page, req.params.perPage)
+      result: pagination(comments, req.params.page, req.params.perPage)
     });
   } catch (error) {
     return ServerError(res, error.messages);
@@ -408,52 +425,60 @@ exports.changeCommentStatusToOld = async (req, res) => {
 exports.findPositionOfCommentBeChose = async (req, res) => {
   try {
     //Count amount of comment before it to know index
-    console.log('test')
-    // const commentBeChose = await Comment.aggregate({
-    //     $match: {
-    //       $and: [
-    //         { "comment._id": req.params.commentId },
-    //         {sort}
-    //         {
-    //           [comment.createdAt]: {
-    //             $elemMatch: { {lt:commentBeChose.createdAt} },
-    //           },
-    //         },
-    //       ],
-    //     },
-    //   })
-    //   .exec();
-
-    console.log("id", req.params.commentId);
-    console.log("comment be chose", commentBeChose);
-
-    const commentIndex = await Comment.find({'comment.createdAt':{lt:commentBeChose.createdAt}}).count();
-    // const rangeQuery = {
-    //   $match: {
-    //     $and: [
-    //       { productId: req.params.commentId },
-    //       {sort}
-    //       {
-    //         [comment.createdAt]: {
-    //           $elemMatch: { {lt:commentBeChose.createdAt} },
-    //         },
-    //       },
-    //     ],
+    // const commentNeedToFindPosition = await Comment.aggregate([
+    //   {
+    //     $match:
+    //       { productId: mongoose.Types.ObjectId(req.params.productId) }
     //   },
-    // };
+    //   {
+    //     $unwind: "$comment"
+    //   },
+    //   {
 
-  
-    // const commentIndex = await Comment.find({ createdAt: { $lt: commentBeChose.createdAt } }).count();
+    //   }
+    // ])
+    const allProductComments = await Comment.findOne({ productId: req.params.productId });
+
+    const commentNeedToFindPosition = allProductComments.comment.find((comment) => comment._id.toString() === req.params.commentId);
 
 
-    console.log("comment Index", commentIndex);
+    const commentIndex = await Comment.aggregate([
+      {
+        $match:
+          { productId: mongoose.Types.ObjectId(req.params.productId) }
+      },
+      {
+        $project:
+          { comment: 1 }
+      },
+      {
+        $unwind: "$comment"
+      },
+      {
+        $sort:
+          { "comment.createdAt": -1 }
+      },
+      {
+        $match:
+          { "comment.createdAt": { $lt: commentNeedToFindPosition.createdAt } }
+      },
+      {
+        $group:
+        {
+          _id: null,
+          count: { $count: {} }
+        }
+      }
+    ]);
 
-    const pageNumberOfComment =
-      commentIndex % req.params.commentPerPage === 0
-        ? Math.floor(commentIndex / req.params.commentPerPage)
-        : Math.floor(commentIndex / req.params.commentPerPage) + 1;
+    console.log(commentIndex)
 
-    return Get(res, { position: { pageNumberOfComment } });
+    //If commentIndex is empty array so this comment index is 0 so position is 1
+    const position = commentIndex && commentIndex.length > 0 ?
+      commentIndex[0].count + 1
+      : 1;
+
+    return Get(res, { result: { position } });
   } catch (error) {
     console.log(error)
     return ServerError(res, error.messages);
