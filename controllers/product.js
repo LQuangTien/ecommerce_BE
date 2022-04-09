@@ -407,12 +407,42 @@ exports.changeCommentStatusToOld = async (req, res) => {
 exports.findPositionOfCommentBeChose = async (req, res) => {
   try {
     //Count amount of comment before it to know index
-
-    const commentBeChose = await Comment.findById(req.params.commentId).exec();
+    console.log('test')
+    const commentBeChose = await Comment.aggregate({
+        $match: {
+          $and: [
+            { "comment._id": req.params.commentId },
+            {sort}
+            {
+              [comment.createdAt]: {
+                $elemMatch: { {lt:commentBeChose.createdAt} },
+              },
+            },
+          ],
+        },
+      })
+      .exec();
 
     console.log("id", req.params.commentId);
     console.log("comment be chose", commentBeChose);
-    const commentIndex = await Comment.find({ createdAt: { $lt: commentBeChose.createdAt } }).count();
+
+    const commentIndex = await Comment.find({'comment.createdAt':{lt:commentBeChose.createdAt}}).count();
+    // const rangeQuery = {
+    //   $match: {
+    //     $and: [
+    //       { productId: req.params.commentId },
+    //       {sort}
+    //       {
+    //         [comment.createdAt]: {
+    //           $elemMatch: { {lt:commentBeChose.createdAt} },
+    //         },
+    //       },
+    //     ],
+    //   },
+    // };
+
+  
+    // const commentIndex = await Comment.find({ createdAt: { $lt: commentBeChose.createdAt } }).count();
 
 
     console.log("comment Index", commentIndex);
