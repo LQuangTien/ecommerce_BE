@@ -55,7 +55,7 @@ router.get("/product/comment/:productId/:page/:perPage", getAllCommentProduct);
 router.get("/products/search/:page/:perPage", readUserInfo, getByQuery);
 router.get("/products/", readUserInfo, getAll);
 router.get(
-  "/products/getCommentPosition/:commentPerPage/:commentId",
+  "/products/getCommentPosition/:commentPerPage/:productId/:commentId",
   findPositionOfCommentBeChose
 );
 
