@@ -365,12 +365,13 @@ exports.getAll = async (req, res) => {
 
 exports.getAllCommentProduct = async (req, res) => {
   try {
+    
     const comments = await Comment.find({
       productId: req.params.productId,
     }).sort({ createdAt: -1 });
 
     return Get(res, {
-      result: pagination(comments, req.params.page, req.params.perPage),
+      result: pagination(comments[0].comment,req.params.page, req.params.perPage)
     });
   } catch (error) {
     return ServerError(res, error.messages);
@@ -408,20 +409,20 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
   try {
     //Count amount of comment before it to know index
     console.log('test')
-    const commentBeChose = await Comment.aggregate({
-        $match: {
-          $and: [
-            { "comment._id": req.params.commentId },
-            {sort}
-            {
-              [comment.createdAt]: {
-                $elemMatch: { {lt:commentBeChose.createdAt} },
-              },
-            },
-          ],
-        },
-      })
-      .exec();
+    // const commentBeChose = await Comment.aggregate({
+    //     $match: {
+    //       $and: [
+    //         { "comment._id": req.params.commentId },
+    //         {sort}
+    //         {
+    //           [comment.createdAt]: {
+    //             $elemMatch: { {lt:commentBeChose.createdAt} },
+    //           },
+    //         },
+    //       ],
+    //     },
+    //   })
+    //   .exec();
 
     console.log("id", req.params.commentId);
     console.log("comment be chose", commentBeChose);
