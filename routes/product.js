@@ -17,6 +17,7 @@ const {
   getAllNotify,
   getAllCommentProduct,
   findPositionOfCommentBeChose,
+  replyComment,
 } = require("../controllers/product");
 
 const router = express.Router();
@@ -39,6 +40,7 @@ router.post(
   create
 );
 router.get("/product/notify", requireSignin, isAdmin, getAllNotify);
+router.get("/product/replyComment", replyComment);
 router.put(
   "/product/:id",
   requireSignin,
@@ -48,12 +50,12 @@ router.put(
 );
 router.put("/product/enable/:id", requireSignin, isAdmin, enable);
 router.delete("/product/:id", requireSignin, isAdmin, remove);
-router.get("/product/:id", readUserInfo, getById);
+router.get("/product/:id", requireSignin, getById);
 
 router.get("/product/comment/:productId/:page/:perPage", getAllCommentProduct);
 
-router.get("/products/search/:page/:perPage", readUserInfo, getByQuery);
-router.get("/products/", readUserInfo, getAll);
+router.get("/products/search/:page/:perPage", requireSignin, getByQuery);
+router.get("/products/", requireSignin, getAll);
 router.get(
   "/products/getCommentPosition/:commentPerPage/:productId/:commentId",
   findPositionOfCommentBeChose
