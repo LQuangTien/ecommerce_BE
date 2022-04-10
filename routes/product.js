@@ -41,7 +41,6 @@ router.post(
   create
 );
 router.get("/product/notify", requireSignin, isAdmin, getAllNotify);
-router.get("/product/replyComment", replyComment);
 router.put(
   "/product/:id",
   requireSignin,

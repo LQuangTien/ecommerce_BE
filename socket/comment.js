@@ -5,7 +5,7 @@ const Notify = require("../models/notify.js");
 module.exports = function (socket, io) {
   socket.on("submit", async (commentContent) => {
     try {
-      // const now = new Date(); 
+      // const now = new Date();
       // const commentCreatedAt = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
 
       const commentCreatedAt = new Date().toISOString();
@@ -17,23 +17,23 @@ module.exports = function (socket, io) {
         userName: user.username,
         content: commentContent.comment,
         rating: commentContent.rating,
-        createdAt: commentCreatedAt
+        createdAt: commentCreatedAt,
       };
-
 
       Comment.findOneAndUpdate(
         { productId: commentContent.productId },
         {
           $push: {
-            comment
-          }
+            comment,
+          },
         },
         { new: true, upsert: true }
       ).exec(async (err, data) => {
+        const newCommentBeAdded = data.comment.find(
+          (doc) => doc.createdAt.toISOString() === commentCreatedAt
+        );
 
-        const newCommentBeAdded = data.comment.find((doc) => doc.createdAt.toISOString() === commentCreatedAt);
-
-        socket.emit("submit", newCommentBeAdded);
+        socket.broadcast.emit("submit", newCommentBeAdded);
 
         const newNotify = new Notify({
           productId: commentContent.productId,
@@ -54,11 +54,33 @@ module.exports = function (socket, io) {
       });
 
       // const savedComment = await newComment.save();
-
     } catch (error) {
       socket.emit("error", error);
       console.log(error);
     }
   });
-};
+  socket.on("reply", async (replyData) => {
+    const user = await User.findOne({ _id: socket.user._id });
 
+    const reply = {
+      userId: user._id,
+      userName: user.username,
+      // userId: req.body._id,
+      // userName: req.body.username,
+      content: replyData.content,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedComment = await Comment.findOneAndUpdate(
+      { productId: replyData.productId, "comment._id": replyData.commentId },
+      {
+        $push: {
+          "comment.$.subComment": reply,
+        },
+      },
+      { new: true, upsert: true }
+    );
+
+    io.emit("reply", updatedComment);
+  });
+};

@@ -509,35 +509,6 @@ function pagination(items, page = 1, perPage = 8) {
   };
 }
 
-exports.replyComment = async (req, res) => {
-  try {
-    const user = User.find({ _id: req.user._id });
-
-    const reply = {
-      userId: req.user._id,
-      userName: user.username,
-      // userId: req.body._id,
-      // userName: req.body.username,
-      content: req.body.content,
-      createdAt: new Date().toISOString(),
-    };
-
-    const updatedComment = await Comment.findOneAndUpdate(
-      { productId: req.body.productId, "comment._id": req.body.commentId },
-      {
-        $push: {
-          "comment.$.subComment": reply,
-        },
-      },
-      { new: true, upsert: true }
-    );
-
-    return Get(res, { result: { updatedComment } });
-  } catch (error) {
-    return ServerError(res, error.messages);
-  }
-};
-
 function addMetaDataForSearchInCategory(products) {
   // Use for search page to multi query
   return {
