@@ -75,12 +75,12 @@ io.on("connection", (socket) => {
   require("./socket/comment")(socket, io);
 });
 
-// io.of('/admin').on('connection',(socket)=>{
-//   console.log('admin connecting...')
-//   socket.on('notify admin',(notifyData)=>{
-//     console.log(notifyData);
-//   })
-// })
+io.of('/admin').on('connection',(socket)=>{
+  console.log('admin connecting...')
+  socket.on('notify admin',(notifyData)=>{
+    console.log(notifyData);
+  })
+})
 
 app.set("io", io);
 

@@ -28,6 +28,7 @@ exports.requireSignin = (req, res, next) => {
   }
 };
 
+//DEPRECATE DƯ THỪA VCL
 exports.readUserInfo = (req, res, next) => {
   if (!req.headers.authorization) return next();
 

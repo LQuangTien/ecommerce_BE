@@ -7,9 +7,9 @@ module.exports = function (socket, io) {
     try {
       // const now = new Date(); 
       // const commentCreatedAt = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
-      
+
       const commentCreatedAt = new Date().toISOString();
-      
+
       const user = await User.findOne({ _id: socket.user._id });
 
       const comment = {
@@ -17,21 +17,21 @@ module.exports = function (socket, io) {
         userName: user.username,
         content: commentContent.comment,
         rating: commentContent.rating,
-        createdAt:commentCreatedAt
+        createdAt: commentCreatedAt
       };
 
 
-      const updatedComment = Comment.findOneAndUpdate(
+      Comment.findOneAndUpdate(
         { productId: commentContent.productId },
         {
-            $push: {
-              comment
-            }       
+          $push: {
+            comment
+          }
         },
         { new: true, upsert: true }
       ).exec(async (err, data) => {
 
-        const newCommentBeAdded = data.comment.find((doc)=> doc.createdAt.toISOString()===commentCreatedAt);
+        const newCommentBeAdded = data.comment.find((doc) => doc.createdAt.toISOString() === commentCreatedAt);
 
         socket.emit("submit", newCommentBeAdded);
 

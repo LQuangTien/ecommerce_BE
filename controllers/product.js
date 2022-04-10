@@ -365,24 +365,6 @@ exports.getAll = async (req, res) => {
 
 exports.getAllCommentProduct = async (req, res) => {
   try {
-    console.log('test')
-    // const comments = await Comment.aggregate([
-    //   {
-    //     $match:
-    //       { productId: mongoose.Types.ObjectId(req.params.productId) }
-    //   },
-    //   {
-    //     $project:
-    //       { comment: 1 }
-    //   },
-    //   {
-    //     $unwind: "$comment"
-    //   },
-    //   {
-    //     $sort:
-    //       { "comment.createdAt": -1 }
-    //   }
-    // ]);
     const comments = await Comment.aggregate([
       {
         $match:
@@ -442,15 +424,16 @@ exports.getAllNotify = async (req, res) => {
 
 exports.changeCommentStatusToOld = async (req, res) => {
   try {
-    const updatedComment = await Comment.findByIdAndUpdate(
+    const updatedNotify = await Notify.findByIdAndUpdate(
       req.params.id,
       {
         $set: { status: "old" },
       },
       { new: true, useFindAndModify: false }
-    ).exec();
-    if (updatedComment) return Update(res, { updatedComment });
-    return NotFound(res, "Product");
+    );
+    
+    if (updatedNotify) return Update(res, { updatedNotify });
+    return NotFound(res, "Notify");
   } catch (error) {
     return ServerError(res, error.message);
   }
@@ -522,6 +505,35 @@ function pagination(items, page = 1, perPage = 8) {
       totalProduct: items.length,
     },
   };
+}
+
+exports.replyComment = async (req, res) => {
+  try {
+    const user = User.find({ _id: req.user._id });
+
+    const reply = {
+      userId: req.user._id,
+      userName: user.username,
+      // userId: req.body._id,
+      // userName: req.body.username,
+      content: req.body.content,
+      createdAt: new Date().toISOString(),
+    };
+
+
+    const updatedComment = await Comment.findOneAndUpdate(
+      {productId:req.body.productId, "comment._id": req.body.commentId },
+      {
+        $push: {
+          "comment.$.subComment": reply
+        }
+      },
+      { new: true, upsert: true });
+
+    return Get(res, { result: { updatedComment } });
+  } catch (error) {
+    return ServerError(res, error.messages)
+  }
 }
 
 function addMetaDataForSearchInCategory(products) {
