@@ -18,6 +18,7 @@ const {
   getAllCommentProduct,
   findPositionOfCommentBeChose,
   replyComment,
+  changeCommentStatusToOld,
 } = require("../controllers/product");
 
 const router = express.Router();
@@ -50,15 +51,17 @@ router.put(
 );
 router.put("/product/enable/:id", requireSignin, isAdmin, enable);
 router.delete("/product/:id", requireSignin, isAdmin, remove);
-router.get("/product/:id", requireSignin, getById);
+router.get("/product/:id", getById);
 
 router.get("/product/comment/:productId/:page/:perPage", getAllCommentProduct);
 
-router.get("/products/search/:page/:perPage", requireSignin, getByQuery);
-router.get("/products/", requireSignin, getAll);
+router.get("/products/search/:page/:perPage", getByQuery);
+router.get("/products/", getAll);
 router.get(
   "/products/getCommentPosition/:commentPerPage/:productId/:commentId",
   findPositionOfCommentBeChose
 );
+
+router.patch("/products/read-notify/:id", changeCommentStatusToOld);
 
 module.exports = router;

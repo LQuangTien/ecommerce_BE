@@ -58,7 +58,7 @@ exports.create = async (req, res) => {
     const productComment = new Comment({
       productId: savedProduct._id,
       productName: savedProduct.name,
-      comment: []
+      comment: [],
     });
 
     await productComment.save();
@@ -367,44 +367,45 @@ exports.getAllCommentProduct = async (req, res) => {
   try {
     const comments = await Comment.aggregate([
       {
-        $match:
-          { productId: mongoose.Types.ObjectId(req.params.productId) }
+        $match: { productId: mongoose.Types.ObjectId(req.params.productId) },
       },
       {
-        $project:
-          { comment: 1 }
+        $project: { comment: 1 },
       },
       {
-        $unwind: "$comment"
+        $unwind: "$comment",
       },
       {
         $facet: {
-          "result": [
+          result: [
             {
-              $sort:
-                { "comment.createdAt": -1 }
-            }
+              $sort: { "comment.createdAt": -1 },
+            },
           ],
-          "total": [
+          total: [
             {
-              $group:
-              {
+              $group: {
                 _id: "$comment.rating",
-                count: { $count: {} }
-              }
-            }
-          ]
-        }
-      }
+                count: { $count: {} },
+              },
+            },
+          ],
+        },
+      },
     ]);
 
-    const result = pagination(comments[0].result, req.params.page, req.params.perPage);
+    const result = pagination(
+      comments[0].result,
+      req.params.page,
+      req.params.perPage
+    );
     const total = comments[0].total;
 
     return Get(res, {
       result: {
-        result, total
-      }
+        result,
+        total,
+      },
     });
   } catch (error) {
     return ServerError(res, error.messages);
@@ -413,7 +414,9 @@ exports.getAllCommentProduct = async (req, res) => {
 
 exports.getAllNotify = async (req, res) => {
   try {
-    const notifies = await Notify.find({}).sort({ createdAt: -1 });
+    const notifies = await Notify.find({ status: "new" }).sort({
+      createdAt: -1,
+    });
 
     notifies.total = notifies.length;
     return Get(res, { result: { notifies, total: notifies.length } });
@@ -431,7 +434,7 @@ exports.changeCommentStatusToOld = async (req, res) => {
       },
       { new: true, useFindAndModify: false }
     );
-    
+
     if (updatedNotify) return Update(res, { updatedNotify });
     return NotFound(res, "Notify");
   } catch (error) {
@@ -441,57 +444,56 @@ exports.changeCommentStatusToOld = async (req, res) => {
 
 exports.findPositionOfCommentBeChose = async (req, res) => {
   try {
-    const allProductComments = await Comment.findOne({ productId: req.params.productId });
+    const allProductComments = await Comment.findOne({
+      productId: req.params.productId,
+    });
 
-    const commentNeedToFindPosition = allProductComments.comment.find((comment) => comment._id.toString() === req.params.commentId);
-
+    const commentNeedToFindPosition = allProductComments.comment.find(
+      (comment) => comment._id.toString() === req.params.commentId
+    );
 
     const commentIndex = await Comment.aggregate([
       {
-        $match:
-          { productId: mongoose.Types.ObjectId(req.params.productId) }
+        $match: { productId: mongoose.Types.ObjectId(req.params.productId) },
       },
       {
-        $project:
-          { comment: 1 }
+        $project: { comment: 1 },
       },
       {
-        $unwind: "$comment"
+        $unwind: "$comment",
       },
       // {
       //   $sort:
       //     { "comment.createdAt": -1 }
       // },
       {
-        $match:
-          { "comment.createdAt": { $gt: commentNeedToFindPosition.createdAt } }
+        $match: {
+          "comment.createdAt": { $gt: commentNeedToFindPosition.createdAt },
+        },
       },
       {
-        $group:
-        {
+        $group: {
           _id: null,
-          count: { $count: {} }
-        }
-      }
+          count: { $count: {} },
+        },
+      },
     ]);
 
-    console.log(commentIndex)
-
+    console.log(commentIndex);
 
     //If commentIndex is empty array so this comment index is 0 so position is 1
-    const position = commentIndex && commentIndex.length > 0 ?
-      commentIndex[0].count + 1
-      : 1;
+    const position =
+      commentIndex && commentIndex.length > 0 ? commentIndex[0].count + 1 : 1;
 
-    const page = position % req.params.commentPerPage === 0 ?
-      Math.floor(position / req.params.commentPerPage)
-      : Math.floor(position / req.params.commentPerPage) + 1;
+    const page =
+      position % req.params.commentPerPage === 0
+        ? Math.floor(position / req.params.commentPerPage)
+        : Math.floor(position / req.params.commentPerPage) + 1;
 
     return Get(res, { result: { position, page } });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return ServerError(res, error.messages);
-
   }
 };
 
@@ -520,21 +522,21 @@ exports.replyComment = async (req, res) => {
       createdAt: new Date().toISOString(),
     };
 
-
     const updatedComment = await Comment.findOneAndUpdate(
-      {productId:req.body.productId, "comment._id": req.body.commentId },
+      { productId: req.body.productId, "comment._id": req.body.commentId },
       {
         $push: {
-          "comment.$.subComment": reply
-        }
+          "comment.$.subComment": reply,
+        },
       },
-      { new: true, upsert: true });
+      { new: true, upsert: true }
+    );
 
     return Get(res, { result: { updatedComment } });
   } catch (error) {
-    return ServerError(res, error.messages)
+    return ServerError(res, error.messages);
   }
-}
+};
 
 function addMetaDataForSearchInCategory(products) {
   // Use for search page to multi query
