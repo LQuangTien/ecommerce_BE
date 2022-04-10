@@ -365,10 +365,24 @@ exports.getAll = async (req, res) => {
 
 exports.getAllCommentProduct = async (req, res) => {
   try {
-
-    // const comments = await Comment.find({
-    //   productId: req.params.productId,
-    // }).sort({ createdAt: -1 });
+    console.log('test')
+    // const comments = await Comment.aggregate([
+    //   {
+    //     $match:
+    //       { productId: mongoose.Types.ObjectId(req.params.productId) }
+    //   },
+    //   {
+    //     $project:
+    //       { comment: 1 }
+    //   },
+    //   {
+    //     $unwind: "$comment"
+    //   },
+    //   {
+    //     $sort:
+    //       { "comment.createdAt": -1 }
+    //   }
+    // ]);
     const comments = await Comment.aggregate([
       {
         $match:
@@ -382,13 +396,33 @@ exports.getAllCommentProduct = async (req, res) => {
         $unwind: "$comment"
       },
       {
-        $sort:
-          { "comment.createdAt": -1 }
+        $facet: {
+          "result": [
+            {
+              $sort:
+                { "comment.createdAt": -1 }
+            }
+          ],
+          "total": [
+            {
+              $group:
+              {
+                _id: "$comment.rating",
+                count: { $count: {} }
+              }
+            }
+          ]
+        }
       }
     ]);
 
+    const result = pagination(comments[0].result, req.params.page, req.params.perPage);
+    const total = comments[0].total;
+
     return Get(res, {
-      result: pagination(comments, req.params.page, req.params.perPage)
+      result: {
+        result, total
+      }
     });
   } catch (error) {
     return ServerError(res, error.messages);
@@ -397,7 +431,7 @@ exports.getAllCommentProduct = async (req, res) => {
 
 exports.getAllNotify = async (req, res) => {
   try {
-    const notifies = await Notify.find({}).sort({createdAt:-1});
+    const notifies = await Notify.find({}).sort({ createdAt: -1 });
 
     notifies.total = notifies.length;
     return Get(res, { result: { notifies, total: notifies.length } });
@@ -457,7 +491,7 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
         }
       }
     ]);
-    
+
     console.log(commentIndex)
 
 
@@ -466,11 +500,11 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
       commentIndex[0].count + 1
       : 1;
 
-    const page = position % req.params.commentPerPage  === 0?
-    Math.floor(position / req.params.commentPerPage)
-    :Math.floor(position / req.params.commentPerPage)+1; 
-    
-    return Get(res, { result: { position,page } });
+    const page = position % req.params.commentPerPage === 0 ?
+      Math.floor(position / req.params.commentPerPage)
+      : Math.floor(position / req.params.commentPerPage) + 1;
+
+    return Get(res, { result: { position, page } });
   } catch (error) {
     console.log(error)
     return ServerError(res, error.messages);
