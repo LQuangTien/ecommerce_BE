@@ -50,7 +50,7 @@ router.put(
 );
 router.put("/product/enable/:id", requireSignin, isAdmin, enable);
 router.delete("/product/:id", requireSignin, isAdmin, remove);
-router.get("/product/:id", getById);
+router.get("/product/:id", readUserInfo, getById);
 
 router.get("/product/comment/:productId/:page/:perPage", getAllCommentProduct);
 

@@ -33,7 +33,7 @@ module.exports = function (socket, io) {
           (doc) => doc.createdAt.toISOString() === commentCreatedAt
         );
 
-        socket.broadcast.emit("submit", newCommentBeAdded);
+        io.emit("submit", newCommentBeAdded);
 
         const newNotify = new Notify({
           productId: commentContent.productId,

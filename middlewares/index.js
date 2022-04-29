@@ -41,9 +41,8 @@ exports.readUserInfo = (req, res, next) => {
   return next();
 };
 
-
 exports.isAdmin = (req, res, next) => {
-  console.log(req.user.role);
+  console.log({ role: req.user.role });
   if (req.user.role !== "admin" && req.user.role !== "staff")
     return Unauthorized(res);
   return next();

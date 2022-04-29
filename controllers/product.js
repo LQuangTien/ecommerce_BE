@@ -340,7 +340,7 @@ exports.getByQuery = async (req, res) => {
       const { page, perPage } = req.params;
       const result = pagination(filterAvailableProduct, page, perPage);
       result.metadata = addMetaDataForSearchInCategory(filterAvailableProduct);
-      return Get(res, result);
+      return Get(res, { result });
     }
 
     NotFound(res, "Product");
