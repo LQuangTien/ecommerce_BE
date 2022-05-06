@@ -58,12 +58,16 @@ const productSchema = mongoose.Schema(
         },
       },
     ],
+    labels: {
+      type: Array,
+      required: false
+    },
   },
   { timestamps: true }
 );
 
-productSchema.post('save', function(error, doc, next) {
-  if (error.name==='MongoError'&&error.code === 11000) {
+productSchema.post('save', function (error, doc, next) {
+  if (error.name === 'MongoError' && error.code === 11000) {
     next(new Error('The product existed'));
   } else {
     next();
