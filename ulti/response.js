@@ -29,13 +29,15 @@ const Create = (res, data) => {
   );
 };
 
+/** Nhớ có {} bọc data **/
 const Update = (res, data) => {
   return Response(res, {
     message: message.UPDATE,
-    data: flat(data),
+    data: flat(data), 
   });
 };
 
+/** Nhớ có {} bọc data **/
 const Delete = (res, data) => {
   return Response(res, {
     message: message.DELETE,
