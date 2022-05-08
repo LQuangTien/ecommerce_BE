@@ -131,7 +131,7 @@ async function deleteLabelOnProduct(productId, label) {
   return await Product.findByIdAndUpdate(
     productId,
     {
-      $pull: { labels: label },
+      $pull: { labels: { $in: label } },
     },
     {
       new: true,
