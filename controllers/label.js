@@ -122,12 +122,7 @@ exports.removeLabelFromProduct = async (productId, label) => {
         useFindAndModify: false,
       }
     );
-
-    if (updatedProduct) return Update(res, { updatedProduct });
-    return NotFound(res, "Product");
-  } catch (error) {
-    return ServerError(res, error.message);
-  }
+  } catch (error) {}
 };
 
 async function deleteLabelOnProduct(productId, label) {

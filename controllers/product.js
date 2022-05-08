@@ -133,18 +133,22 @@ exports.update = async (req, res) => {
       },
       { new: true, useFindAndModify: false }
     ).exec();
+    console.log(labels);
     const labelList = labels
       .filter((x) => x !== "" || x == null || x == void 0)
       .map((l) => JSON.parse(l));
     const oldLabels = updatedProduct.labels;
-    oldLabels.forEach((oldLabel) => {
+    oldLabels.forEach(async (oldLabel) => {
       if (!labels.includes(oldLabel))
-        await LabelController.removeLabelFromProduct(updatedProduct._id, oldLabel);
+        await LabelController.removeLabelFromProduct(
+          updatedProduct._id,
+          oldLabel
+        );
     });
 
-    labelList.forEach((newLabel) => {
+    labelList.forEach(async (newLabel) => {
       if (!oldLabels.includes(newLabel))
-        await LabelController.addLabelToProduct(updatedProduct._id, newLabel);
+        await LabelController.addLabelToProduct(updatedProduct._id, [newLabel]);
     });
 
     if (updatedProduct) return Update(res, { updatedProduct });
