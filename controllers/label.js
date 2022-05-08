@@ -100,11 +100,11 @@ exports.addLabelToProduct = async (productId, labels) => {
   });
 };
 
-exports.removeLabelFromProduct = async (req, res) => {
+exports.removeLabelFromProduct = async (productId,label) => {
   try {
-    const updatedProduct = await deleteLabelOnProduct(req.body.productId, req.body.label);
+    const updatedProduct = await deleteLabelOnProduct(productId, label);
 
-    await Label.findOneAndUpdate({ name: req.body.label }, { $pull: { listProduct: req.body.productId } }, {
+    await Label.findOneAndUpdate({ name: label }, { $pull: { listProduct: productId } }, {
       new: true,
       useFindAndModify: false,
     });

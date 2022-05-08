@@ -141,7 +141,7 @@ exports.update = async (req, res) => {
     }));
 
     labels.forEach((newLabel => {
-      if(!oldLabels.includes(newLabel)) LabelController.addLabelFromProduct(savedProduct._id,newLabel);
+      if(!oldLabels.includes(newLabel)) LabelController.addLabelToProduct(savedProduct._id,newLabel);
     }));
 
     if (updatedProduct) return Update(res, { updatedProduct });
