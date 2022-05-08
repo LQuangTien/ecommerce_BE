@@ -135,18 +135,14 @@ exports.update = async (req, res) => {
     ).exec();
 
     const oldLabels = updatedProduct.labels;
-    oldLabels.forEach(async (oldLabel) => {
-      if (!labels.includes(oldLabel))
-        await LabelController.removeLabelFromProduct(
-          updatedProduct._id,
-          oldLabel
-        );
-    });
 
-    labels.forEach(async (newLabel) => {
-      if (!oldLabels.includes(newLabel))
-        await LabelController.addLabelToProduct(updatedProduct._id, newLabel);
-    });
+    const removeLabels = oldLabels.filter(oldLabel => !labels.includes(oldLabel));
+    LabelController.removeLabelFromProduct(savedProduct._id,removeLabels);
+
+    const addLabels = labels.forEach(newLabel => !oldLabels.includes(newLabel));
+    LabelController.addLabelToProduct(savedProduct._id,addLabels);
+
+    console.log("remove add",removeLabels,addLabels);
 
     if (updatedProduct) return Update(res, { updatedProduct });
     return NotFound(res, "Product");
