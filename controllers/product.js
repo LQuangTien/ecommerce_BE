@@ -11,7 +11,6 @@ const Notify = require("../models/notify");
 
 const LabelController = require("../controllers/label");
 
-
 const {
   ServerError,
   Create,
@@ -59,7 +58,7 @@ exports.create = async (req, res) => {
 
     const savedProduct = await newProduct.save();
 
-    LabelController.addLabelToProduct(savedProduct._id,labels);
+    LabelController.addLabelToProduct(savedProduct._id, labels);
 
     const productComment = new Comment({
       productId: savedProduct._id,
@@ -134,15 +133,19 @@ exports.update = async (req, res) => {
       },
       { new: true, useFindAndModify: false }
     ).exec();
-
+    const labelList = labels
+      .filter((x) => x !== "" || x == null || x == void 0)
+      .map((l) => JSON.parse(l));
     const oldLabels = updatedProduct.labels;
-    oldLabels.forEach((oldLabel => {
-      if(!labels.includes(oldLabel)) LabelController.removeLabelFromProduct(savedProduct._id,oldLabel);
-    }));
+    oldLabels.forEach((oldLabel) => {
+      if (!labels.includes(oldLabel))
+        await LabelController.removeLabelFromProduct(updatedProduct._id, oldLabel);
+    });
 
-    labels.forEach((newLabel => {
-      if(!oldLabels.includes(newLabel)) LabelController.addLabelToProduct(savedProduct._id,newLabel);
-    }));
+    labelList.forEach((newLabel) => {
+      if (!oldLabels.includes(newLabel))
+        await LabelController.addLabelToProduct(updatedProduct._id, newLabel);
+    });
 
     if (updatedProduct) return Update(res, { updatedProduct });
     return NotFound(res, "Product");
