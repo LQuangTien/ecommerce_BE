@@ -91,7 +91,7 @@ exports.remove = async (req, res) => {
 };
 
 exports.addLabelToProduct = async (productId, labels) => {
-  labels[0] = JSON.parse(labels);
+  // labels[0] = JSON.parse(labels);
   const updatedProduct = await Product.findByIdAndUpdate(
     productId,
     {
@@ -111,8 +111,8 @@ exports.addLabelToProduct = async (productId, labels) => {
   });
 };
 
-exports.removeLabelFromProduct = async (productId, labelData) => {
-  const label = JSON.parse(labelData);
+exports.removeLabelFromProduct = async (productId, label) => {
+  // const label = JSON.parse(labelData);
   try {
     const updatedProduct = await deleteLabelOnProduct(productId, label);
 

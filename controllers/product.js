@@ -134,15 +134,16 @@ exports.update = async (req, res) => {
       { new: true, useFindAndModify: false }
     ).exec();
 
-    const oldLabels = updatedProduct.labels;
+    if (labels === undefined) {
+      const oldLabels = updatedProduct.labels;
 
-    const removeLabels = oldLabels.filter(oldLabel => !labels.includes(oldLabel));
-    LabelController.removeLabelFromProduct(savedProduct._id,removeLabels);
+      const removeLabels = oldLabels.filter(oldLabel => !labels.includes(oldLabel));
+      LabelController.removeLabelFromProduct(savedProduct._id, removeLabels);
 
-    const addLabels = labels.forEach(newLabel => !oldLabels.includes(newLabel));
-    LabelController.addLabelToProduct(savedProduct._id,addLabels);
-
-    console.log("remove add",removeLabels,addLabels);
+      const addLabels = labels.forEach(newLabel => !oldLabels.includes(newLabel));
+      LabelController.addLabelToProduct(savedProduct._id, addLabels);
+    }
+    console.log("remove add", removeLabels, addLabels);
 
     if (updatedProduct) return Update(res, { updatedProduct });
     return NotFound(res, "Product");
