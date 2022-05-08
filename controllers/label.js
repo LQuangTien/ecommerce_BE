@@ -85,27 +85,19 @@ exports.remove = async (req, res) => {
   }
 };
 
-exports.addLabelToProduct = async (req, res) => {
-  try {
-    const labels = JSON.parse(req.body.labels);
+exports.addLabelToProduct = async (productId, labels) => {
+  const labels = JSON.parse(labels);
 
-    const updatedProduct = await Product.findByIdAndUpdate(req.body.productId, {
-      $addToSet: { 'labels': { $each: labels } }
-    }, {
-      new: true,
-      useFindAndModify: false,
-    }).exec();
+  const updatedProduct = await Product.findByIdAndUpdate(productId, {
+    $addToSet: { 'labels': { $each: labels } }
+  }, {
+    new: true,
+    useFindAndModify: false,
+  }).exec();
 
-
-    labels.forEach(async label => {
-      await Label.updateOne({ name: label }, { $addToSet: { listProduct: req.body.productId } }).exec();
-    });
-
-    if (updatedProduct) return Update(res, { updatedProduct });
-    return NotFound(res, "Product");
-  } catch (error) {
-    return ServerError(res, error.message);
-  }
+  labels.forEach(async label => {
+    await Label.updateOne({ name: label }, { $addToSet: { listProduct: productId } }).exec();
+  });
 };
 
 exports.removeLabelFromProduct = async (req, res) => {
