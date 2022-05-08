@@ -54,12 +54,15 @@ exports.update = async (req, res) => {
     }).exec();
 
     if (oldLabel.name !== newLabel.name) {
-      newLabel.listProduct.forEach(async productId => {
-        await Product.findOneAndUpdate({ _id: productId, labels: oldLabel.name },
-          { $set: { "labels.$": newLabel.name } }, {
-          new: true,
-          useFindAndModify: false,
-        })
+      newLabel.listProduct.forEach(async (productId) => {
+        await Product.findOneAndUpdate(
+          { _id: productId, labels: oldLabel.name },
+          { $set: { "labels.$": newLabel.name } },
+          {
+            new: true,
+            useFindAndModify: false,
+          }
+        );
       });
     }
 
@@ -72,10 +75,12 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    const deletedLabel = await Label.findByIdAndDelete(req.params.id, { useFindAndModify: false }).exec();
+    const deletedLabel = await Label.findByIdAndDelete(req.params.id, {
+      useFindAndModify: false,
+    }).exec();
 
-    deletedLabel.listProduct.forEach(async productId => {
-      await deleteLabelOnProduct(productId, deletedLabel.name)
+    deletedLabel.listProduct.forEach(async (productId) => {
+      await deleteLabelOnProduct(productId, deletedLabel.name);
     });
 
     if (deletedLabel) return Delete(res, { deletedLabel });
@@ -86,42 +91,51 @@ exports.remove = async (req, res) => {
 };
 
 exports.addLabelToProduct = async (productId, labels) => {
-  const labels = JSON.parse(labels);
+  // labels[0] = JSON.parse(labels);
+  const updatedProduct = await Product.findByIdAndUpdate(
+    productId,
+    {
+      $addToSet: { labels: { $each: labels } },
+    },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  ).exec();
 
-  const updatedProduct = await Product.findByIdAndUpdate(productId, {
-    $addToSet: { 'labels': { $each: labels } }
-  }, {
-    new: true,
-    useFindAndModify: false,
-  }).exec();
-
-  labels.forEach(async label => {
-    await Label.updateOne({ name: label }, { $addToSet: { listProduct: productId } }).exec();
+  labels.forEach(async (label) => {
+    await Label.updateOne(
+      { name: label },
+      { $addToSet: { listProduct: productId } }
+    ).exec();
   });
 };
 
-exports.removeLabelFromProduct = async (productId,label) => {
+exports.removeLabelFromProduct = async (productId, label) => {
+  // const label = JSON.parse(labelData);
   try {
     const updatedProduct = await deleteLabelOnProduct(productId, label);
 
-    await Label.findOneAndUpdate({ name: label }, { $pull: { listProduct: productId } }, {
-      new: true,
-      useFindAndModify: false,
-    });
-
-    if (updatedProduct) return Update(res, { updatedProduct });
-    return NotFound(res, "Product");
-  } catch (error) {
-    return ServerError(res, error.message);
-  }
+    await Label.findOneAndUpdate(
+      { name: label },
+      { $pull: { listProduct: productId } },
+      {
+        new: true,
+        useFindAndModify: false,
+      }
+    );
+  } catch (error) {}
 };
 
 async function deleteLabelOnProduct(productId, label) {
-  return await Product.findByIdAndUpdate(productId, {
-    $pull: { 'labels': label }
-  }, {
-    new: true,
-    useFindAndModify: false,
-  }).exec();
+  return await Product.findByIdAndUpdate(
+    productId,
+    {
+      $pull: { labels: label },
+    },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  ).exec();
 }
-
