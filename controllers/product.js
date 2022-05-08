@@ -120,12 +120,8 @@ exports.update = async (req, res) => {
           });
         })
     );
-    console.log(1);
     const img = await Promise.all(imagePromies);
-    console.log(2);
     updateOption.productPictures = img;
-    console.log({ a: img });
-    console.log(3);
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       {
@@ -135,20 +131,22 @@ exports.update = async (req, res) => {
     ).exec();
 
     if (labels !== undefined) {
+      const labelData = JSON.parse(labels);
       const oldLabels = updatedProduct.labels;
 
       const removeLabels = oldLabels.filter(
-        (oldLabel) => !labels.includes(oldLabel)
+        (oldLabel) => !labelData.includes(oldLabel)
       );
-      await LabelController.removeLabelFromProduct(
-        updatedProduct._id,
-        removeLabels
-      );
-
-      const addLabels = labels.filter(
+      const addLabels = labelData.filter(
         (newLabel) => !oldLabels.includes(newLabel)
       );
-      await LabelController.addLabelToProduct(updatedProduct._id, addLabels);
+      await Promise.all([
+        LabelController.removeLabelFromProduct(
+          updatedProduct._id,
+          removeLabels
+        ),
+        LabelController.addLabelToProduct(updatedProduct._id, addLabels),
+      ]);
     }
 
     if (updatedProduct) return Update(res, { updatedProduct });
