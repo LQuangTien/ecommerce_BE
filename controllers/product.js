@@ -1,12 +1,16 @@
 const mongoose = require("mongoose");
 const fs = require("fs/promises");
+const shortid = require("shortid");
+const slugify = require("slugify");
+const cloudinary = require("cloudinary").v2;
+
 const Product = require("../models/product");
 const Category = require("../models/category");
 const Comment = require("../models/comment");
 const Notify = require("../models/notify");
-const shortid = require("shortid");
-const slugify = require("slugify");
-const cloudinary = require("cloudinary").v2;
+
+const LabelController = require("../controllers/label");
+
 
 const {
   ServerError,
@@ -27,7 +31,7 @@ cloudinary.config({
 
 exports.create = async (req, res) => {
   try {
-    const { name, categoryInfo, ...other } = req.body;
+    const { name, categoryInfo, labels, ...other } = req.body;
     const parseCate = categoryInfo.map((cate) => JSON.parse(cate));
     const imagePromies = req.files.map(
       (file) =>
@@ -55,6 +59,8 @@ exports.create = async (req, res) => {
 
     const savedProduct = await newProduct.save();
 
+    LabelController.addLabelToProduct(savedProduct._id,labels);
+
     const productComment = new Comment({
       productId: savedProduct._id,
       productName: savedProduct.name,
@@ -71,7 +77,7 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, categoryInfo, ...other } = req.body;
+    const { name, categoryInfo, labels, ...other } = req.body;
     const parseCate = categoryInfo.map((cate) => JSON.parse(cate));
     // let pictures;
     const updateOption = {
@@ -128,6 +134,15 @@ exports.update = async (req, res) => {
       },
       { new: true, useFindAndModify: false }
     ).exec();
+
+    const oldLabels = updatedProduct.labels;
+    oldLabels.forEach((oldLabel => {
+      if(!labels.includes(oldLabel)) LabelController.removeLabelFromProduct(savedProduct._id,oldLabel);
+    }));
+
+    labels.forEach((newLabel => {
+      if(!oldLabels.includes(newLabel)) LabelController.addLabelFromProduct(savedProduct._id,newLabel);
+    }));
 
     if (updatedProduct) return Update(res, { updatedProduct });
     return NotFound(res, "Product");
