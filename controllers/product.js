@@ -58,7 +58,10 @@ exports.create = async (req, res) => {
 
     const savedProduct = await newProduct.save();
 
-    LabelController.addLabelToProduct(savedProduct._id, labels);
+    await LabelController.addLabelToProduct(
+      savedProduct._id,
+      JSON.parse(labels)
+    );
 
     const productComment = new Comment({
       productId: savedProduct._id,
