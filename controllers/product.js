@@ -149,7 +149,7 @@ exports.update = async (req, res) => {
       ]);
     }
 
-    const latestProduct = Product.findById(updatedProduct._id);
+    const latestProduct = await Product.findById(updatedProduct._id);
     if (latestProduct) return Update(res, { latestProduct });
     return NotFound(res, "Product");
   } catch (error) {
