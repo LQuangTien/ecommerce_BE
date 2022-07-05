@@ -18,10 +18,10 @@ const {
 const router = express.Router();
 
 router.post("/signin", validateSignin, isAuthValidated, signin);
-router.post("/signin", googleSignin);
 router.post("/signup", validateSignup, isAuthValidated, signup);
 router.post("/signout", requireSignin, signout);
 router.post("/forget-password", forgetPassword);
 router.post("/change-password", requireSignin, changePassword);
+router.post("/google-signin", isAuthValidated, googleSignin);
 
 module.exports = router;

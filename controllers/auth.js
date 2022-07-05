@@ -149,12 +149,6 @@ exports.googleSignin = (req, res) => {
   User.findOne({ email: req.body.email }).exec(async (error, user) => {
     if (error) return ServerError(res, error);
     if (user) {
-      if (user.accountType !== "google") {
-        return BadRequest(
-          res,
-          "Make sure you are logged in with your google account"
-        );
-      }
       const token = jwt.sign(
         {
           _id: user._id,
