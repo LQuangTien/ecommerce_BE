@@ -523,10 +523,19 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
 
 exports.checkUserCanComment = async (req, res) => {
   try {
-    const isUserComment = await Comment.findOne({productId:req.params.productId,[comment.userId]: req.user._id});
+    const isUserComment = await Comment.findOne({
+      productId: req.params.productId,
+      "comment.userId": req.user._id,
+    });
 
-    if (isUserComment) return Get(res, { result:false });
-    return Get(res, { result:true });
+    if (isUserComment)
+      return Get(res, {
+        result: {
+          canComment: false,
+          comment: isUserComment,
+        },
+      });
+    return Get(res, { result: true });
   } catch (error) {
     return ServerError(res, error.message);
   }
