@@ -58,7 +58,10 @@ exports.create = async (req, res) => {
 
     const savedProduct = await newProduct.save();
 
-    LabelController.addLabelToProduct(savedProduct._id, labels);
+    await LabelController.addLabelToProduct(
+      savedProduct._id,
+      JSON.parse(labels)
+    );
 
     const productComment = new Comment({
       productId: savedProduct._id,
@@ -515,6 +518,17 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
   } catch (error) {
     console.log(error);
     return ServerError(res, error.messages);
+  }
+};
+
+exports.checkUserCanComment = async (req, res) => {
+  try {
+    const isUserComment = await Comment.findOne({userId: req.user._id});
+
+    if (isUserComment) return Get(res, { result:true });
+    return Get(res, { result:false });
+  } catch (error) {
+    return ServerError(res, error.message);
   }
 };
 
