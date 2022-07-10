@@ -19,6 +19,7 @@ const {
   findPositionOfCommentBeChose,
   replyComment,
   changeCommentStatusToOld,
+  checkUserCanComment,
 } = require("../controllers/product");
 
 const router = express.Router();
@@ -41,6 +42,7 @@ router.post(
   create
 );
 router.get("/product/notify", requireSignin, isAdmin, getAllNotify);
+router.get("/product/checkUserCanComment ",  requireSignin, checkUserCanComment);
 router.put(
   "/product/:id",
   requireSignin,
