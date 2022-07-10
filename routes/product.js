@@ -42,7 +42,7 @@ router.post(
   create
 );
 router.get("/product/notify", requireSignin, isAdmin, getAllNotify);
-router.get("/product/checkUserCanComment ",  requireSignin, checkUserCanComment);
+router.get("/product/checkUserCanComment/:productId",  requireSignin, checkUserCanComment);
 router.put(
   "/product/:id",
   requireSignin,
