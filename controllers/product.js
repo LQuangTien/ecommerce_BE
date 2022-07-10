@@ -521,6 +521,17 @@ exports.findPositionOfCommentBeChose = async (req, res) => {
   }
 };
 
+exports.checkUserCanComment = async (req, res) => {
+  try {
+    const isUserComment = await Comment.findOne({userId: req.user._id});
+
+    if (isUserComment) return Get(res, { result:true });
+    return Get(res, { result:false });
+  } catch (error) {
+    return ServerError(res, error.message);
+  }
+};
+
 function pagination(items, page = 1, perPage = 8) {
   const previousItem = (page - 1) * Number(perPage);
   return {
