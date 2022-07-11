@@ -127,10 +127,11 @@ exports.zaloPayment = async (req, res) => {
 
   if (newOrder instanceof Error) return ServerError(res, newOrder);
 
+  
   const dataZaloOrder = await zaloCreateOrder(
     newOrder._doc._id.toString(),
     newOrder._doc.items,
-    newOrder._doc.totalAmount
+    newOrder._doc.totalAmount*22000,
   );
 
   console.log('dataZaloOrder', dataZaloOrder);

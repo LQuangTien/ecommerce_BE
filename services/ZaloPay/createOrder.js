@@ -6,9 +6,9 @@ const { ServerError, BadRequest, Create, Get } = require("../../ulti/response");
 
 exports.zaloCreateOrder = (orderIdFromServer, orderItemFromServer, orderPriceFromServer) => {
   //dữ liệu dc callback cho server khi thanh toán thành công
-  const embed_data = {
+  const embeddata = {
     // merchantinfo: orderIdFromServer,
-    redirecturl: "http://localhost:3000/",
+    redirecturl: "http://localhost:3001/",
   };
 
   //danh sách sản phẩm
@@ -22,28 +22,29 @@ exports.zaloCreateOrder = (orderIdFromServer, orderItemFromServer, orderPriceFro
   ];
 
   const transID = Math.floor(Math.random() * 1000000);
-
+ 
   const order = {
-    app_id: process.env.ZALO_APPID,
-    app_trans_id: `${moment().format('YYMMDD')}_${transID}`, // mã giao dich có định dạng yyMMdd_xxxx
-    app_user: "demo",
-    app_time: Date.now(), // miliseconds
+    appid: process.env.ZALO_APPID,
+    apptransid: `${moment().format('YYMMDD')}_${transID}`, // mã giao dich có định dạng yyMMdd_xxxx
+    appuser: "demo",
+    apptime: Date.now(), // miliseconds
     item: JSON.stringify(items),
-    embed_data: JSON.stringify(embed_data),
+    embeddata: JSON.stringify(embeddata),
     amount: orderPriceFromServer,
-    description: `Lazada - Payment for the order #${transID}`,
-    bank_code: "zalopayapp",
+    description: `Kinzy - Payment for the order #${transID}`,
+    bankcode: "zalopayapp",
   };
 
+  console.log("ordr",order);
   // appid|apptransid|appuser|amount|apptime|embeddata|item
-  const data = process.env.ZALO_APPID + "|" + order.app_trans_id + "|" + order.app_user + "|" + order.amount + "|" + order.app_time +
-    "|" + order.embed_data + "|" + order.item;
+  const data = process.env.ZALO_APPID + "|" + order.apptransid + "|" + order.appuser + "|" + order.amount + "|" + order.apptime +
+    "|" + order.embeddata + "|" + order.item;
 
   order.mac = CryptoJS.HmacSHA256(data, process.env.ZALO_KEY_FOR_SERVER_REQUEST).toString();
 
   return axios.post(process.env.ZALO_CREATE_ORDER_API, null, { params: order })
     .then(res => {
-      res.data.apptransid = order.app_trans_id;
+      res.data.apptransid = order.apptransid;
       return res.data;
     })
     .catch(err => err);
