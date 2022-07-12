@@ -125,6 +125,7 @@ exports.zaloPayment = async (req, res) => {
 
   const newOrder = await createOrder(req.user._id, req.body);
 
+  console.log("new",newOrder)
   if (newOrder instanceof Error) return ServerError(res, newOrder);
 
   

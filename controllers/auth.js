@@ -131,13 +131,13 @@ async function sendEmail(userEmail, newPwd) {
     host: "smtp.gmail.com",
     auth: {
       user: "quangtienclone@gmail.com",
-      pass: "Tien123!",
+      pass: "oxzepjylslupdfdy",
     },
   });
 
   // send mail with defined transport object
   return await transporter.sendMail({
-    from: "nightmarelod9@gmail.com", // sender address
+    from: "kinzyproduction@gmail.com", // sender address
     to: userEmail, // list of receivers
     subject: "Change password success ✔", // Subject line
     text: "This is your new Password: " + newPwd, // plain text body
