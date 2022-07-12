@@ -141,7 +141,7 @@ exports.zaloPayment = async (req, res) => {
   return Get(res, {
     order: {
       ...newOrder,
-      redirectUrl: dataZaloOrder.order_url,
+      redirectUrl: dataZaloOrder.orderurl,
       apptransid: dataZaloOrder.apptransid,
     },
   });
