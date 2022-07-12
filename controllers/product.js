@@ -124,7 +124,8 @@ exports.update = async (req, res) => {
         })
     );
     const img = await Promise.all(imagePromies);
-    updateOption.productPictures = img;
+    const p = await Product.findById(req.params.id);
+    updateOption.productPictures = [...img, ...p.productPictures];
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       {
