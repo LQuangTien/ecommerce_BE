@@ -44,6 +44,15 @@ const userSchema = new mongoose.Schema(
       enum: ["google", "facebook", "email"],
       default: "email",
     },
+    status: {
+      type: String,
+      enum: ["pending", "active"],
+      default: "pending",
+    },
+    activeCode: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

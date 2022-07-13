@@ -30,6 +30,7 @@ exports.signup = (req, res) => {
         email,
         hash_password,
         username: `${firstName} ${lastName}`,
+        activeCode: shortId.generate(),
       });
       newUser.save((error, user) => {
         //test bỏ cái này thử
@@ -44,9 +45,9 @@ exports.signup = (req, res) => {
             process.env.JWT_SECRET
           );
           const { firstName, lastName, email, fullName } = user;
+          sendActiveEmail(user.email, user._id, user.activeCode);
           return Response(res, {
-            token,
-            user: { firstName, lastName, email, fullName },
+            result: "Your account has been created, please check your mail to active it"
           });
         }
       });
@@ -59,6 +60,7 @@ exports.signin = (req, res) => {
   User.findOne({ email: req.body.email }).exec(async (error, user) => {
     if (error) return ServerError(res, error);
     if (!user) return BadRequest(res, "User does not exist");
+    if (user.status === "pending") return BadRequest(res, "Unactive account");
     const isAuthen = await user.authenticate(req.body.password);
     if (!isAuthen) return BadRequest(res, "Wrong password");
     const token = jwt.sign(
@@ -82,7 +84,7 @@ exports.signout = (req, res) => {
 
 exports.forgetPassword = async (req, res) => {
   try {
-    const emailExist = User.findOne({ email: req.body.userEmail });
+    const emailExist = await User.findOne({ email: req.body.userEmail });
 
     if (!emailExist) return BadRequest(res, "Email chưa được đăng ký");
 
@@ -142,6 +144,42 @@ async function sendEmail(userEmail, newPwd) {
     subject: "Change password success ✔", // Subject line
     text: "This is your new Password: " + newPwd, // plain text body
     html: "<b>" + "This is your new Password: " + newPwd + "</b>", // html body
+  });
+}
+
+exports.active = (req, res) => {
+  const user = await User.findById(req.params.userId);
+
+  if (!user) return BadRequest(res, "User does not exist");
+
+  if (!(user.activeCode === req.params.activeCode)) return BadRequest(res, "Active code does not exist");
+
+  await User.findOneAndUpdate(
+    { _id: req.params.userId },
+    { $set: { status: "active" } },
+    { new: true, useFindAndModify: false }
+  );
+
+  return Get(res, { result: "Active account success" });
+};
+
+async function sendActiveEmail(userEmail, userId, activeCode) {
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    auth: {
+      user: "quangtienclone@gmail.com",
+      pass: "oxzepjylslupdfdy",
+    },
+  });
+
+  // send mail with defined transport object
+  return await transporter.sendMail({
+    from: "kinzyproduction@gmail.com", // sender address
+    to: userEmail, // list of receivers
+    subject: "Active account  ✔", // Subject line
+    text: "This is your active link: " + `$https://ecommerce-client-teal.vercel.app/active?id=${userID}&activeCode=${activeCode}`, // plain text body
+    html: "<b>" + "This is your active link: " + `$https://ecommerce-client-teal.vercel.app/active?id=${userID}&activeCode=${activeCode}` + "</b>", // html body
   });
 }
 
