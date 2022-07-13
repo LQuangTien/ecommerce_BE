@@ -8,7 +8,7 @@ exports.zaloCreateOrder = (orderIdFromServer, orderItemFromServer, orderPriceFro
   //dữ liệu dc callback cho server khi thanh toán thành công
   const embeddata = {
     // merchantinfo: orderIdFromServer,
-    redirecturl: "http://localhost:3000/",
+    redirecturl: "https://ecommerce-client-teal.vercel.app ",//"http://localhost:3000/",
   };
 
   //danh sách sản phẩm
