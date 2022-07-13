@@ -13,6 +13,7 @@ const {
   changePassword,
   forgetPassword,
   googleSignin,
+  active,
 } = require("../controllers/auth");
 
 const router = express.Router();
@@ -23,5 +24,6 @@ router.post("/signout", requireSignin, signout);
 router.post("/forget-password", forgetPassword);
 router.post("/change-password", requireSignin, changePassword);
 router.post("/google-signin", isAuthValidated, googleSignin);
+router.get("/active", active);
 
 module.exports = router;

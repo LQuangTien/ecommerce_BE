@@ -147,7 +147,7 @@ async function sendEmail(userEmail, newPwd) {
   });
 }
 
-exports.active = (req, res) => {
+exports.active = async (req, res) => {
   const user = await User.findById(req.params.userId);
 
   if (!user) return BadRequest(res, "User does not exist");
