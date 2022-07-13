@@ -58,7 +58,7 @@ exports.zaloGetStatusOrderByOrderId = async (zaloOrderId) => {
       .then(function (res) {
         counter++;
         console.log(counter);
-        if (res.data.return_code === 1) {
+        if (res.data.returncode === 1) {
           return res.data;
         } else if (counter === MAX_AMOUNT_CALL_BEFORE_FAIL_PAYMENT) {
           return -1;
