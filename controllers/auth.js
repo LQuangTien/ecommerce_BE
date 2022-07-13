@@ -186,11 +186,11 @@ async function sendActiveEmail(userEmail, userId, activeCode) {
     subject: "Active account  ✔", // Subject line
     text:
       "This is your active link: " +
-      `$https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}`, // plain text body
+      `https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}`, // plain text body
     html:
       "<b>" +
       "This is your active link: " +
-      `$https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}` +
+      `https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}` +
       "</b>", // html body
   });
 }
