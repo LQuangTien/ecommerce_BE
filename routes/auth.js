@@ -24,6 +24,6 @@ router.post("/signout", requireSignin, signout);
 router.post("/forget-password", forgetPassword);
 router.post("/change-password", requireSignin, changePassword);
 router.post("/google-signin", isAuthValidated, googleSignin);
-router.get("/active", active);
+router.get("/active/:userId/:activeCode", active);
 
 module.exports = router;
