@@ -47,7 +47,8 @@ exports.signup = (req, res) => {
           const { firstName, lastName, email, fullName } = user;
           sendActiveEmail(user.email, user._id, user.activeCode);
           return Response(res, {
-            result: "Your account has been created, please check your mail to active it"
+            result:
+              "Your account has been created, please check your mail to active it",
           });
         }
       });
@@ -86,7 +87,7 @@ exports.forgetPassword = async (req, res) => {
   try {
     const emailExist = await User.findOne({ email: req.body.userEmail });
 
-    if (!emailExist) return BadRequest(res, "Email chưa được đăng ký");
+    if (!emailExist) return BadRequest(res, "Email does not exist");
 
     const newPassword = await updateNewPasswordForForgetPassword(
       req.body.userEmail
@@ -148,19 +149,24 @@ async function sendEmail(userEmail, newPwd) {
 }
 
 exports.active = async (req, res) => {
-  const user = await User.findById(req.params.userId);
+  try {
+    const user = await User.findById(req.params.userId);
 
-  if (!user) return BadRequest(res, "User does not exist");
+    if (!user) return BadRequest(res, "User does not exist");
 
-  if (!(user.activeCode === req.params.activeCode)) return BadRequest(res, "Active code does not exist");
+    if (!(user.activeCode === req.params.activeCode))
+      return BadRequest(res, "Active code does not exist");
 
-  await User.findOneAndUpdate(
-    { _id: req.params.userId },
-    { $set: { status: "active" } },
-    { new: true, useFindAndModify: false }
-  );
+    await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $set: { status: "active" } },
+      { new: true, useFindAndModify: false }
+    );
 
-  return Get(res, { result: "Active account success" });
+    return Get(res, { result: "Your account has been activated successfully" });
+  } catch (error) {
+    return BadRequest(res, "User does not exist");
+  }
 };
 
 async function sendActiveEmail(userEmail, userId, activeCode) {
@@ -178,8 +184,10 @@ async function sendActiveEmail(userEmail, userId, activeCode) {
     from: "kinzyproduction@gmail.com", // sender address
     to: userEmail, // list of receivers
     subject: "Active account  ✔", // Subject line
+
     text: "This is your active link: " + `https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}`, // plain text body
     html: "<b>" + "This is your active link: " + `https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}` + "</b>", // html body
+
   });
 }
 
