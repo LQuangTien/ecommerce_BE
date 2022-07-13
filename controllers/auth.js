@@ -184,14 +184,10 @@ async function sendActiveEmail(userEmail, userId, activeCode) {
     from: "kinzyproduction@gmail.com", // sender address
     to: userEmail, // list of receivers
     subject: "Active account  ✔", // Subject line
-    text:
-      "This is your active link: " +
-      `https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}`, // plain text body
-    html:
-      "<b>" +
-      "This is your active link: " +
-      `https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}` +
-      "</b>", // html body
+
+    text: "This is your active link: " + `https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}`, // plain text body
+    html: "<b>" + "This is your active link: " + `https://ecommerce-client-teal.vercel.app/active/${userId}/${activeCode}` + "</b>", // html body
+
   });
 }
 
