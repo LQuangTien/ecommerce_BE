@@ -154,7 +154,7 @@ exports.getOrderStatus = async (req, res) => {
       await Order.deleteOne({ _id: req.body.orderId });
       return Get(res, { info: "Đơn hàng zalo chưa thanh toán đã bị hủy" });
     }
-    if (orderStatus.return_code === 1) {
+    if (orderStatus.returncode === 1) {
       const updatedOrder = await updateOrderStatusToOrdered(req.body.orderId);
       if (typeof updatedOrder === "string")
         return ServerError(res, updatedOrder);
@@ -247,7 +247,8 @@ const updateOrderStatusToOrdered = async (orderId) => {
       { new: true, useFindAndModify: false }
     ).populate("items.productId", "name productPictures");
 
-    console.log("order", order);
+    console.log("chang order status", order)
+
     const promises = [];
     order.items.forEach((product) => {
       const promise = Product.findByIdAndUpdate(product.productId, {
