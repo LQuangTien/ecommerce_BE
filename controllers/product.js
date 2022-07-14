@@ -371,6 +371,7 @@ exports.getByQuery = async (req, res) => {
 
     NotFound(res, "Product");
   } catch (error) {
+    console.log({ error });
     return ServerError(res, error.messages);
   }
 };
@@ -557,13 +558,15 @@ function pagination(items, page = 1, perPage = 8) {
 
 function addMetaDataForSearchInCategory(products) {
   // Use for search page to multi query
+  console.log({ products: products[0].categoryInfo });
   return {
     categories: [...new Set(products.map((p) => p.category))],
     brands: [
       ...new Set(
-        products.map(
-          (p) =>
-            p.categoryInfo.find((c) => c.name.toLowerCase() === "brand").value
+        products.map((p) =>
+          p.categoryInfo.find((c) => c.name.toLowerCase() === "brand")
+            ? p.categoryInfo.find((c) => c.name.toLowerCase() === "brand").value
+            : ""
         )
       ),
     ],
