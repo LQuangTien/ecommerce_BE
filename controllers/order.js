@@ -127,19 +127,14 @@ exports.zaloPayment = async (req, res) => {
 
   const newOrder = await createOrder(req.user._id, req.body);
 
-  console.log("new", newOrder)
   if (newOrder instanceof Error) return ServerError(res, newOrder)
 
   let currencyConverter = new CC({ from: "USD", to: "VND", amount: newOrder._doc.totalAmount })
   let totalAmountFromDollarToVND = await currencyConverter.convert();
 
-  const dataZaloOrder = await zaloCreateOrder(
-    newOrder._doc._id.toString(),
-    newOrder._doc.items,
-    totalAmountFromDollarToVND,
   );
 
-  console.log('dataZaloOrder', dataZaloOrder);
+  console.log("dataZaloOrder", dataZaloOrder);
 
   if (typeof dataZaloOrder === "string") return ServerError(res, dataZaloOrder);
   return Get(res, {
@@ -152,10 +147,9 @@ exports.zaloPayment = async (req, res) => {
 };
 
 exports.getOrderStatus = async (req, res) => {
-
   try {
     const orderStatus = await zaloGetStatusOrderByOrderId(req.body.apptransid);
-    console.log('dataZaloOrder', orderStatus);
+    console.log("dataZaloOrder", orderStatus);
     if (isNaN(orderStatus) === false && orderStatus === -1) {
       await Order.deleteOne({ _id: req.body.orderId });
       return Get(res, { info: "Đơn hàng zalo chưa thanh toán đã bị hủy" });
@@ -254,6 +248,7 @@ const updateOrderStatusToOrdered = async (orderId) => {
     ).populate("items.productId", "name productPictures");
 
     console.log("chang order status", order)
+
     const promises = [];
     order.items.forEach((product) => {
       const promise = Product.findByIdAndUpdate(product.productId, {
@@ -321,7 +316,10 @@ async function checkBuyAmountLTEProductAmount(userId) {
   const CartPopulateProductQuantity = await Cart.findOne({ user: userId })
     .populate("cartItems.product", "quantity")
     .exec();
-  if (CartPopulateProductQuantity.hasOwnProperty("cartItems") === false)
+  if (
+    !CartPopulateProductQuantity ||
+    CartPopulateProductQuantity.hasOwnProperty("cartItems") === false
+  )
     return false;
   return CartPopulateProductQuantity.cartItems.some(
     (cartItem) => cartItem.quantity > cartItem.product.quantity
