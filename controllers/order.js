@@ -3,6 +3,8 @@ const fs = require("fs");
 const { v1: uuid } = require("uuid");
 const moment = require("moment");
 const axios = require("axios").default;
+const CC = require('currency-converter-lt')
+
 const Cart = require("../models/cart");
 const Order = require("../models/order");
 const Address = require("../models/address");
@@ -125,13 +127,11 @@ exports.zaloPayment = async (req, res) => {
 
   const newOrder = await createOrder(req.user._id, req.body);
 
-  console.log("new", newOrder);
-  if (newOrder instanceof Error) return ServerError(res, newOrder);
+  if (newOrder instanceof Error) return ServerError(res, newOrder)
 
-  const dataZaloOrder = await zaloCreateOrder(
-    newOrder._doc._id.toString(),
-    newOrder._doc.items,
-    newOrder._doc.totalAmount * 22000
+  let currencyConverter = new CC({ from: "USD", to: "VND", amount: newOrder._doc.totalAmount })
+  let totalAmountFromDollarToVND = await currencyConverter.convert();
+
   );
 
   console.log("dataZaloOrder", dataZaloOrder);
@@ -266,6 +266,25 @@ const updateOrderStatusToOrdered = async (orderId) => {
     return orderWithAddress;
   } catch (error) {
     return error.messages;
+  }
+};
+
+exports.checkUserHasBoughtProduct = async (req, res) => {
+  try {
+    const isUserHasBoughtProduct = await Order.exists({
+      user: req.params.userId, //req.user._id,
+      "items.productId": req.params.productId,
+    });
+
+    if (isUserHasBoughtProduct)
+      return Get(res, {
+        result: {
+          canComment: true,
+        },
+      });
+    return Get(res, { result: false });
+  } catch (error) {
+    return ServerError(res, error.message);
   }
 };
 
