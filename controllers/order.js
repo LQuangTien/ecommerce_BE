@@ -4,6 +4,7 @@ const { v1: uuid } = require("uuid");
 const moment = require("moment");
 const axios = require("axios").default;
 const CC = require("currency-converter-lt");
+const paypal = require("@paypal/checkout-server-sdk");
 
 const Cart = require("../models/cart");
 const Order = require("../models/order");
@@ -142,7 +143,7 @@ exports.zaloPayment = async (req, res) => {
     totalAmountFromDollarToVND
   );
 
-  console.log("dataZaloOrder", dataZaloOrder);
+  // console.log("dataZaloOrder", dataZaloOrder);
 
   if (typeof dataZaloOrder === "string") return ServerError(res, dataZaloOrder);
   return Get(res, {
@@ -215,6 +216,7 @@ const createOrder = async (userId, orderInfo) => {
       },
       select: "_id status items",
     });
+  
     return newOrder;
   } catch (error) {
     return error;
@@ -274,6 +276,72 @@ const updateOrderStatusToOrdered = async (orderId) => {
     return orderWithAddress;
   } catch (error) {
     return error.messages;
+  }
+};
+
+exports.paypalPayment = async (req, res) => {
+  const checkInvalidBuyAmount = await checkBuyAmountLTEProductAmount(
+    req.user._id
+  );
+  if (checkInvalidBuyAmount) return BadRequest(res, "Out of stock");
+
+  const newOrder = await createOrder(req.user._id, req.body);
+  if (newOrder instanceof Error) return ServerError(res, newOrder);
+
+
+
+  const Environment = paypal.core.SandboxEnvironment;
+  const paypalClient = new paypal.core.PayPalHttpClient(
+    new Environment(
+      process.env.PAYPAL_CLIENT_ID,
+      process.env.PAYPAL_CLIENT_SECRET
+    )
+  );
+
+  const request = new paypal.orders.OrdersCreateRequest();
+  request.prefer("return=representation")
+  request.requestBody({
+    intent: "CAPTURE",
+    purchase_units: [
+      {
+        amount: {
+          currency_code: "USD",
+          value: newOrder._doc.totalAmount,
+          breakdown: {
+            item_total: {
+              currency_code: "USD",
+              value: newOrder._doc.totalAmount,
+            },
+          },
+        },
+        items: newOrder._doc.items.map(item => {
+          // console.log("paypal-ordr", newOrder.items[0].productId.name);
+          return {
+            name: items.productId.name,
+            unit_amount: {
+              currency_code: "USD",
+              value: item.paidPrice,
+            },
+            quantity: item.quantity,
+          }
+        }),
+      },
+    ],
+  })
+
+  try {
+    const order = await paypalClient.execute(request);
+    // res.json({ id: order.result.id })
+
+    return Get(res, {
+      order: {
+        ...newOrder,
+        redirectUrl: dataZaloOrder.orderurl,
+        apptransid: dataZaloOrder.apptransid,
+      },
+    });
+  } catch (error) {
+    return ServerError(res, error );
   }
 };
 

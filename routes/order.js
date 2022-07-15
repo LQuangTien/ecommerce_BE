@@ -10,6 +10,7 @@ const {
   getOrderStatus,
   seedData,
   checkUserHasBoughtProduct,
+  paypalPayment,
 } = require("../controllers/order");
 
 const router = express.Router();
@@ -21,6 +22,7 @@ router.post("/user/order/add", requireSignin, add);
 router.post("/user/order/zaloPayment", requireSignin, zaloPayment);
 router.post("/user/order/getOrderStatus", requireSignin, getOrderStatus);
 
+router.post("/user/order/paypalPayment", requireSignin, paypalPayment);
 // router.get("/user/order/getOrderStatus", getOrderStatus);
 
 router.get("/user/order/:_id", requireSignin, getById);

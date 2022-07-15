@@ -38,7 +38,7 @@ const orderSchema = new mongoose.Schema(
     // },
     paymentOption: {
       type: String,
-      enum: ["cod", "zalo"],
+      enum: ["cod", "zalo","paypal"],
       required: true,
     },
     process: [
