@@ -9,6 +9,7 @@ const {
   verifyZaloPayment,
   getOrderStatus,
   seedData,
+  checkUserHasBoughtProduct,
 } = require("../controllers/order");
 
 const router = express.Router();
@@ -23,5 +24,6 @@ router.post("/user/order/getOrderStatus", requireSignin, getOrderStatus);
 // router.get("/user/order/getOrderStatus", getOrderStatus);
 
 router.get("/user/order/:_id", requireSignin, getById);
+router.get("/user/order/checkUserHasBoughtProduct/:productId", requireSignin, checkUserHasBoughtProduct);
 
 module.exports = router;
