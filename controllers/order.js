@@ -3,7 +3,7 @@ const fs = require("fs");
 const { v1: uuid } = require("uuid");
 const moment = require("moment");
 const axios = require("axios").default;
-const CC = require('currency-converter-lt')
+const CC = require("currency-converter-lt");
 
 const Cart = require("../models/cart");
 const Order = require("../models/order");
@@ -127,11 +127,19 @@ exports.zaloPayment = async (req, res) => {
 
   const newOrder = await createOrder(req.user._id, req.body);
 
-  if (newOrder instanceof Error) return ServerError(res, newOrder)
+  if (newOrder instanceof Error) return ServerError(res, newOrder);
 
-  let currencyConverter = new CC({ from: "USD", to: "VND", amount: newOrder._doc.totalAmount })
+  let currencyConverter = new CC({
+    from: "USD",
+    to: "VND",
+    amount: newOrder._doc.totalAmount,
+  });
   let totalAmountFromDollarToVND = await currencyConverter.convert();
 
+  const dataZaloOrder = await zaloCreateOrder(
+    newOrder._doc._id.toString(),
+    newOrder._doc.items,
+    totalAmountFromDollarToVND
   );
 
   console.log("dataZaloOrder", dataZaloOrder);
@@ -247,7 +255,7 @@ const updateOrderStatusToOrdered = async (orderId) => {
       { new: true, useFindAndModify: false }
     ).populate("items.productId", "name productPictures");
 
-    console.log("chang order status", order)
+    console.log("chang order status", order);
 
     const promises = [];
     order.items.forEach((product) => {
@@ -272,7 +280,7 @@ const updateOrderStatusToOrdered = async (orderId) => {
 exports.checkUserHasBoughtProduct = async (req, res) => {
   try {
     const isUserHasBoughtProduct = await Order.exists({
-      user: req.params.userId, //req.user._id,
+      user: req.user._id, //req.user._id,
       "items.productId": req.params.productId,
     });
 
@@ -282,7 +290,11 @@ exports.checkUserHasBoughtProduct = async (req, res) => {
           canComment: true,
         },
       });
-    return Get(res, { result: false });
+    return Get(res, {
+      result: {
+        canComment: false,
+      },
+    });
   } catch (error) {
     return ServerError(res, error.message);
   }
