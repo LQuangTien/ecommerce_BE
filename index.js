@@ -71,7 +71,6 @@ io.on("connection", (socket) => {
   // socket.on('submit', (msg) => {
   //   console.log(msg);
   // });
-  //
 
   require("./socket/comment")(socket, io);
 });
