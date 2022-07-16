@@ -149,8 +149,8 @@ exports.zaloPayment = async (req, res) => {
   return Get(res, {
     order: {
       ...newOrder,
-      redirectUrl: dataZaloOrder.orderurl,
-      apptransid: dataZaloOrder.apptransid,
+      redirectUrl: dataZaloOrder.order_url,
+      apptransid: dataZaloOrder.app_trans_id,
     },
   });
 };
@@ -163,7 +163,7 @@ exports.getOrderStatus = async (req, res) => {
       await Order.deleteOne({ _id: req.body.orderId });
       return Get(res, { info: "Đơn hàng zalo chưa thanh toán đã bị hủy" });
     }
-    if (orderStatus.returncode === 1) {
+    if (orderStatus.return_code === 1) {
       const updatedOrder = await updateOrderStatusToOrdered(req.body.orderId);
       if (typeof updatedOrder === "string")
         return ServerError(res, updatedOrder);

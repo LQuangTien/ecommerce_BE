@@ -8,7 +8,7 @@ exports.zaloCreateOrder = (orderIdFromServer, orderItemFromServer, orderPriceFro
   //dữ liệu dc callback cho server khi thanh toán thành công
   const embeddata = {
     // merchantinfo: orderIdFromServer,
-    redirecturl: "https://ecommerce-client-teal.vercel.app",//"http://localhost:3000/",
+    redirect_url: "https://ecommerce-client-teal.vercel.app",//"http://localhost:3000/",
   };
 
   //danh sách sản phẩm
@@ -24,27 +24,27 @@ exports.zaloCreateOrder = (orderIdFromServer, orderItemFromServer, orderPriceFro
   const transID = Math.floor(Math.random() * 1000000);
  
   const order = {
-    appid: process.env.ZALO_APPID,
-    apptransid: `${moment().format('YYMMDD')}_${transID}`, // mã giao dich có định dạng yyMMdd_xxxx
-    appuser: "demo",
-    apptime: Date.now(), // miliseconds
+    app_id: process.env.ZALO_APPID,
+    app_trans_id: `${moment().format('YYMMDD')}_${transID}`, // mã giao dich có định dạng yyMMdd_xxxx
+    app_user: "demo",
+    app_time: Date.now(), // miliseconds
     item: JSON.stringify(items),
-    embeddata: JSON.stringify(embeddata),
+    embed_data: JSON.stringify(embeddata),
     amount: orderPriceFromServer,
     description: `Kinzy - Payment for the order #${transID}`,
-    bankcode: "zalopayapp",
+    bank_code: "zalopayapp",
   };
 
   console.log("ordr",order);
   // appid|apptransid|appuser|amount|apptime|embeddata|item
-  const data = process.env.ZALO_APPID + "|" + order.apptransid + "|" + order.appuser + "|" + order.amount + "|" + order.apptime +
-    "|" + order.embeddata + "|" + order.item;
+  const data = process.env.ZALO_APPID + "|" + order.app_trans_id + "|" + order.app_user + "|" + order.amount + "|" + order.app_time +
+    "|" + order.embed_data + "|" + order.item;
 
   order.mac = CryptoJS.HmacSHA256(data, process.env.ZALO_KEY_FOR_SERVER_REQUEST).toString();
 
   return axios.post(process.env.ZALO_CREATE_ORDER_API, null, { params: order })
     .then(res => {
-      res.data.apptransid = order.apptransid;
+      res.data.app_trans_id = order.app_trans_id;
       return res.data;
     })
     .catch(err => err);

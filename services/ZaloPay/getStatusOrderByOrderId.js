@@ -5,11 +5,11 @@ const { ServerError, BadRequest, Create, Get } = require("../../ulti/response");
 
 exports.zaloGetStatusOrderByOrderId = async (zaloOrderId) => {
   let postData = {
-    appid: process.env.ZALO_APPID,
-    apptransid: zaloOrderId, // Input your apptransid
+    app_id: process.env.ZALO_APPID,
+    app_trans_id: zaloOrderId, // Input your apptransid
   };
 
-  let data = postData.appid + "|" + postData.apptransid + "|" + process.env.ZALO_KEY_FOR_SERVER_REQUEST; // appid|apptransid|key1
+  let data = postData.app_id + "|" + postData.app_trans_id + "|" + process.env.ZALO_KEY_FOR_SERVER_REQUEST; // appid|apptransid|key1
 
   postData.mac = CryptoJS.HmacSHA256(
     data,
@@ -58,7 +58,7 @@ exports.zaloGetStatusOrderByOrderId = async (zaloOrderId) => {
       .then(function (res) {
         counter++;
         console.log(counter);
-        if (res.data.returncode === 1) {
+        if (res.data.return_code === 1) {
           return res.data;
         } else if (counter === MAX_AMOUNT_CALL_BEFORE_FAIL_PAYMENT) {
           return -1;
