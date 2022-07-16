@@ -216,7 +216,7 @@ const createOrder = async (userId, orderInfo) => {
       },
       select: "_id status items",
     });
-  
+
     return newOrder;
   } catch (error) {
     return error;
@@ -280,68 +280,53 @@ const updateOrderStatusToOrdered = async (orderId) => {
 };
 
 exports.paypalPayment = async (req, res) => {
-  const checkInvalidBuyAmount = await checkBuyAmountLTEProductAmount(
-    req.user._id
-  );
-  if (checkInvalidBuyAmount) return BadRequest(res, "Out of stock");
-
-  const newOrder = await createOrder(req.user._id, req.body);
-  if (newOrder instanceof Error) return ServerError(res, newOrder);
-
-
-
-  const Environment = paypal.core.SandboxEnvironment;
-  const paypalClient = new paypal.core.PayPalHttpClient(
-    new Environment(
-      process.env.PAYPAL_CLIENT_ID,
-      process.env.PAYPAL_CLIENT_SECRET
-    )
-  );
-
-  const request = new paypal.orders.OrdersCreateRequest();
-  request.prefer("return=representation")
-  request.requestBody({
-    intent: "CAPTURE",
-    purchase_units: [
-      {
-        amount: {
-          currency_code: "USD",
-          value: newOrder._doc.totalAmount,
-          breakdown: {
-            item_total: {
-              currency_code: "USD",
-              value: newOrder._doc.totalAmount,
-            },
-          },
-        },
-        items: newOrder._doc.items.map(item => {
-          // console.log("paypal-ordr", newOrder.items[0].productId.name);
-          return {
-            name: items.productId.name,
-            unit_amount: {
-              currency_code: "USD",
-              value: item.paidPrice,
-            },
-            quantity: item.quantity,
-          }
-        }),
-      },
-    ],
-  })
+  req.body.user = req.user._id;
+  req.body.process = [
+    {
+      type: "in progress",
+      isCompleted: true,
+      date: new Date(),
+    },
+    {
+      type: "ordered",
+      isCompleted: true,
+      date: new Date(),
+    },
+    {
+      type: "shipped",
+      isCompleted: false,
+    },
+    {
+      type: "delivered",
+      isCompleted: false,
+    },
+  ];
 
   try {
-    const order = await paypalClient.execute(request);
-    // res.json({ id: order.result.id })
+    const order = new Order(req.body);
+    order.save();
+
+    await Cart.findOneAndDelete({ user: req.user._id }, { useFindAndModify: false });
+
+    const newOrder = await Order.populate(order, {
+      path: "items",
+      populate: {
+        path: "productId",
+        model: "Product",
+        select: "_id name category productPictures",
+      },
+      select: "_id status items",
+    });
 
     return Get(res, {
       order: {
         ...newOrder,
-        redirectUrl: dataZaloOrder.orderurl,
-        apptransid: dataZaloOrder.apptransid,
+        // redirectUrl: dataZaloOrder.orderurl,
+        // apptransid: dataZaloOrder.apptransid,
       },
     });
   } catch (error) {
-    return ServerError(res, error );
+    return ServerError(res, error);
   }
 };
 
