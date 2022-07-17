@@ -147,7 +147,7 @@ function totalOrderPriceInDateRange(start, end) {
 async function totalOrderPrice7DayLatest() {
   const data = { days: [], revenue: [] };
   const result = [];
-  for (let subtractDays = 7; subtractDays >= 1; subtractDays--) {
+  for (let subtractDays = 6; subtractDays >= 0; subtractDays--) {
     let startDate = new Date();
     startDate.setDate(startDate.getDate() - subtractDays);
     const temp = startDate;

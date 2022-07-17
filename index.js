@@ -49,6 +49,7 @@ const io = socketio(server, {
       "http://localhost:3000",
       "http://localhost:3001",
       "https://ecommerce-client-teal.vercel.app",
+      "https://ecommerce-admin-zeta.vercel.app",
     ],
   },
 });
